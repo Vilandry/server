@@ -25,10 +25,11 @@ namespace server.Controllers
                 // Buffer for reading data
                 Byte[] bytes = new Byte[256];
                 String data = null;
+                TcpClient client = new TcpClient();
 
                 try
                 {
-                    TcpClient client = server.AcceptTcpClient();
+                    client = server.AcceptTcpClient();
 
                     Console.WriteLine("here we go");
 
@@ -44,7 +45,6 @@ namespace server.Controllers
                     do
                     {
                         Console.WriteLine("here");
-                        Console.WriteLine( System.Text.Encoding.ASCII.GetString (MD5.HashData(ASCIIEncoding.ASCII.GetBytes(str)))  );
                         i = stream.Read(bytes, 0, bytes.Length);
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, byteCount, i);
@@ -63,6 +63,7 @@ namespace server.Controllers
                     if (raw_text[0] == "LOGIN")
                     {
                         string username = raw_text[1];
+                        Console.WriteLine(raw_text[2]);
                         string password = raw_text[2];
 
                         success = DatabaseController.instance().successfulLogin(username, password);
@@ -94,12 +95,16 @@ namespace server.Controllers
                     stream.Write(msg, 0, msg.Length);
                     Console.WriteLine("Sent: {0}", log);
 
-                    // Shutdown and end connection
-                    client.Close();
+                    
                 }
                 catch(Exception e)
                 {
                     Console.WriteLine("probably someone left");
+                }
+                finally
+                {
+                    // Shutdown and end connection
+                    client.Close();
                 }
             }
         }
