@@ -1,25 +1,40 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Data.SqlClient;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.IO;
 
-
-namespace server.Controllers
+namespace server.Model
 {
-    class LoginController
+    public class PrivateChatMatch
     {
-        public void logincontrol()
+        private SUser user1;
+        private SUser user2;
+        private TcpListener server;
+
+        private List<TcpClient> listOfClients; ///using this model since it will allow us later to reuse the model for group chatting
+
+
+        public PrivateChatMatch(SUser u1, SUser u2, int portnum)
         {
-            TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 11000);
+            user1 = u1;
+            user2 = u2;
+            server = new TcpListener(IPAddress.Any, portnum);
             server.Start();
+        }
 
+        void handleCommand(string commandString)
+        {
 
+        }
+
+        public void HandleChat()
+        {
             while (true)
             {
                 // Buffer for reading data
@@ -29,7 +44,7 @@ namespace server.Controllers
 
                 try
                 {
-                    client = server.AcceptTcpClient();
+                    user1.Client = server.AcceptTcpClient();
 
                     Console.WriteLine("here we go");
 
@@ -37,14 +52,10 @@ namespace server.Controllers
 
                     int i, byteCount = 0;
 
-                    StreamReader sr = new StreamReader(stream);
-
-                    string str = "admin";
-
                     // Loop to receive all the data sent by the client.
                     do
                     {
-                        Console.WriteLine("here");
+                        //Console.WriteLine("here");
                         i = stream.Read(bytes, 0, bytes.Length);
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, byteCount, i);
@@ -60,23 +71,7 @@ namespace server.Controllers
                     string[] raw_text = data.Split("|");
                     bool success = false;
 
-                    if (raw_text[0] == "LOGIN")
-                    {
-                        string username = raw_text[1];
-                        Console.WriteLine(raw_text[2]);
-                        string password = raw_text[2];
-
-                        success = DatabaseController.instance().successfulLogin(username, password);
-                    }
-                    else if (raw_text[0] == "REGISTER")
-                    {
-                        string username = raw_text[1];
-                        string password = raw_text[2];
-                        int age = Int32.Parse(raw_text[3]);
-                        int sex = Int32.Parse(raw_text[4]);
-
-                        success = DatabaseController.instance().successfulRegister(username, password, age, sex);
-                    }///more features to be added if needed
+                    
                     byte[] msg;
                     string log;
                     if (success)
@@ -93,11 +88,12 @@ namespace server.Controllers
 
                     // Send back a response.
                     stream.Write(msg, 0, msg.Length);
+                    stream.Close();
                     Console.WriteLine("Sent: {0}", log);
 
-                    
+
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("probably someone left");
                 }
@@ -109,5 +105,5 @@ namespace server.Controllers
             }
         }
     }
-    
 }
+*/

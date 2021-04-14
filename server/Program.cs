@@ -2,21 +2,23 @@
 using System.Data.SqlClient;
 using System.Net;
 using System.Net.Sockets;
-using server.Controllers;
+using server.Controller;
 using System.Threading;
 
 namespace server
 {
     class Program
     {
-        SqlConnection conn;
         static void Main(string[] args)
         {
-            LoginController lc = new LoginController();
+            LoginController lc = LoginController.instance();
             DatabaseController dc = DatabaseController.instance();
+            MatchController mc = MatchController.instance();
 
-            Thread t = new Thread(new ThreadStart(lc.logincontrol));
-            t.Start();
+            Thread login = new Thread(lc.logincontrol);
+            login.Start();
+
+            Thread match = new Thread(mc.handleRequests);
 
             //dc.successfulRegister("admin", "admin".GetHashCode().ToString(), 1, 1);
 
