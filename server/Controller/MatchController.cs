@@ -20,7 +20,6 @@ namespace server.Controller
         private Dictionary<MatchUser, bool> cantMatch;
         private TcpListener server;
         private static MatchController inst;
-        private int count;
 
 
         public static MatchController instance()
@@ -33,7 +32,7 @@ namespace server.Controller
             return inst;
         }
 
-        private MatchController() { count = 0; }
+        private MatchController() { }
 
 
 
@@ -43,7 +42,7 @@ namespace server.Controller
         /// </summary>
         public void handleRequests()
         {
-            server = new TcpListener(IPAddress.Any, 9900);
+            server = new TcpListener(IPAddress.Any, PortManager.instance().Matchport);
             clients = new List<MatchUser>();
 
             server.Start();
@@ -61,7 +60,8 @@ namespace server.Controller
             }
         }
 
-        void handleMatches()
+
+        private void handleMatches()
         {
             cantMatch = new Dictionary<MatchUser, bool>(); ///in this, we will store the known "unmatchable" users
 
@@ -79,7 +79,33 @@ namespace server.Controller
                         ///create a new instance of privatechat-controller, and match them
                         Console.WriteLine("ITS A MATCH! Matched " + curUser.Username + " WITH " + candidate.Username + "!");
 
-                        PrivateChatController pcc = new PrivateChatController();
+
+
+                        int port = PortManager.instance().GetPrivateChatPort();
+                        if(port == -1)
+                        {
+                            Console.WriteLine("No available port, no match will happen sorry.");
+                            continue;
+                        }
+
+                        string portString = "" + port;
+                        Byte[] portdata = System.Text.Encoding.ASCII.GetBytes(portString);
+
+                        NetworkStream portstream = curUser.Client.GetStream();
+                        portstream.Write(portdata, 0, portdata.Length);
+
+                        portstream = candidate.Client.GetStream();
+                        portstream.Write(portdata, 0, portdata.Length);
+
+
+                        PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
+                        Thread privateChatThread = new Thread(pcc.handleConnecting);
+                        privateChatThread.Start();
+
+                        clients.RemoveAt(i); ///ok tbh it kinda looks scray
+                        clients.RemoveAt(j);
+                        i--;
+                        break;
                     }
                 }
             }
@@ -90,7 +116,7 @@ namespace server.Controller
         /// </summary>
         /// <param name="client">The client which will provide the data for the user</param>
         /// <returns></returns>
-        MatchUser RecreateUser(TcpClient client)
+        private MatchUser RecreateUser(TcpClient client)
         {
             MatchUser queued = null;
             try
@@ -132,7 +158,7 @@ namespace server.Controller
         /// <param name="curUser"></param>
         /// <param name="candidate"></param>
         /// <returns></returns>
-        bool lookingForThem(MatchUser curUser, MatchUser candidate)
+        private bool lookingForThem(MatchUser curUser, MatchUser candidate)
         {
             bool success = (candidate.Age == curUser.Age); ///first step
 

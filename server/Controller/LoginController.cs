@@ -9,6 +9,8 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.IO;
 
+using server.Model;
+
 
 namespace server.Controller
 {
@@ -28,7 +30,7 @@ namespace server.Controller
         private LoginController() { }
         public void logincontrol()
         {
-            TcpListener server = new TcpListener(IPAddress.Any, 11000);
+            TcpListener server = new TcpListener(IPAddress.Any, PortManager.instance().Loginport);
             server.Start();
 
 
@@ -109,7 +111,7 @@ namespace server.Controller
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine("probably someone left");
+                    Console.WriteLine(e.Message + "\nso probably someone left");
                 }
                 finally
                 {

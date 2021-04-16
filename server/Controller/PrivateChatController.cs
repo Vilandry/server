@@ -51,6 +51,7 @@ namespace server.Controller
                         if (!success)
                         {
                             Console.WriteLine("something shit happened");
+                            PortManager.instance().ReturnPrivateChatPort(portnum);
                         }
                     }
 
@@ -104,12 +105,17 @@ namespace server.Controller
 
                                     if(type == CHATTPYE.PRIVATE)
                                     {
-                                        ///send out 
-                                        foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
-                                        {
+                                        PortManager.instance().ReturnPrivateChatPort(portnum);                                       
+                                    }
+                                    ///send out that smbd has disconnected
+                                    foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
+                                    {
+                                        string disconnect_msg = "Your partner has disconnected!";
+                                        Byte[] disconnect_data = System.Text.Encoding.ASCII.GetBytes(disconnect_msg);
 
-                                        }
-                                        ///send event
+
+                                        NetworkStream clientstream = id_lastOne.Value.GetStream();
+                                        clientstream.Write(disconnect_data, 0, data.Length);
                                     }
                                 }
 
