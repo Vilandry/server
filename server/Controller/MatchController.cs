@@ -51,11 +51,32 @@ namespace server.Controller
             while (true)
             {
                 TcpClient client = server.AcceptTcpClient();
-                MatchUser joineduser = RecreateUser(client);
+                NetworkStream ns = client.GetStream();
 
-                Console.WriteLine("Joined " + joineduser.ToString());
+                try
+                {
+                    int buffersize = 1024;
+                    byte[] data = new byte[1024];
+                    ns.Read(data, 0, buffersize);
 
-                clients.Add(joineduser);
+
+                    string raw_info = System.Text.Encoding.UTF8.GetString(data);
+
+                    MatchUser joineduser = RecreateUser(raw_info);
+                    joineduser.Client = client;
+
+                    Console.WriteLine("Joined " + joineduser.ToString());
+
+                    byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("ok");
+                    ns.Write(okmsg, 0, okmsg.Length);
+
+                    clients.Add(joineduser);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
                 handleMatches();
             }
         }
@@ -100,6 +121,7 @@ namespace server.Controller
 
                         PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
                         Thread privateChatThread = new Thread(pcc.handleConnecting);
+
                         privateChatThread.Start();
 
                         clients.RemoveAt(i); ///ok tbh it kinda looks scray
@@ -114,22 +136,15 @@ namespace server.Controller
         /// <summary>
         /// reads fron the client's stream and returns a serveruser with the readed data
         /// </summary>
-        /// <param name="client">The client which will provide the data for the user</param>
+        /// <param name="raw_info">The raw data used for recreate the user</param>
         /// <returns></returns>
-        private MatchUser RecreateUser(TcpClient client)
+        private MatchUser RecreateUser(string raw_info)
         {
             MatchUser queued = null;
             try
             {
                 queued = new MatchUser();
-                queued.Client = client;
-                NetworkStream ns = client.GetStream();
-
-                int buffersize = 1024;
-                byte[] data = new byte[1024];
-                ns.Read(data, 0, buffersize);
-
-                string raw_info = System.Text.Encoding.UTF8.GetString(data);
+                
                 ///FORMAT: Username|age|sex|lookingforsex
 
                 string[] info = raw_info.Split("|");
