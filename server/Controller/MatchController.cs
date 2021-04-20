@@ -74,7 +74,7 @@ namespace server.Controller
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine("Exception in MatchManaging, error message: " + e.Message);
                 }
 
                 handleMatches();
@@ -105,7 +105,7 @@ namespace server.Controller
                         int port = PortManager.instance().GetPrivateChatPort();
                         if(port == -1)
                         {
-                            Console.WriteLine("No available port, no match will happen sorry.");
+                            Console.WriteLine("No available port, no match will happen! Consider restarting the server with a wilder area of ports.");
                             continue;
                         }
 
