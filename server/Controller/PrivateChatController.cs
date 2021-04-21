@@ -44,14 +44,13 @@ namespace server.Controller
                 while (true)
                 {
                     TcpClient client = server.AcceptTcpClient();
-                    Console.WriteLine("smbd arrived!");
+                    Console.WriteLine("A private chat has started!");
                     lock (llock)
                     {
                         bool success = clients.TryAdd(count, client);
                         if (!success)
                         {
                             Console.WriteLine("something shit happened");
-                            PortManager.instance().ReturnPrivateChatPort(portnum);
                         }
                     }
 
@@ -79,11 +78,10 @@ namespace server.Controller
                         if (ns.DataAvailable)
                         {
                             NetworkStream stream = client.GetStream();
-                            byte[] buffer = new byte[1024]; ///this should be sufficient
-                            int byte_count = stream.Read(buffer, 0, buffer.Length);
 
-                            string data = Encoding.ASCII.GetString(buffer, 0, byte_count);
-                            Console.WriteLine(data);
+
+                            string message = Utility.ReadFromNetworkStream(stream);
+                            Console.WriteLine(message);
 
                             foreach (KeyValuePair<int, TcpClient> id_destination in clients)
                             {
@@ -94,12 +92,12 @@ namespace server.Controller
                                 NetworkStream channel = destination.GetStream();
                                 try
                                 {
-                                    channel.Write(buffer, 0, buffer.Length);
+                                    byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
+                                    channel.Write(data, 0, data.Length);
                                 }
                                 catch (Exception e)
                                 {
-                                    Console.WriteLine(e.Message);
-                                    Console.WriteLine("prob smbd disconnected");
+                                    Console.WriteLine("Exception during private chat on port " + portnum + "error message: " + e.Message + ". Client removed from clients");
                                     clients.Remove(id, out destination);
                                     count--;
 
@@ -111,11 +109,11 @@ namespace server.Controller
                                     foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
                                     {
                                         string disconnect_msg = "Your partner has disconnected!";
-                                        Byte[] disconnect_data = System.Text.Encoding.ASCII.GetBytes(disconnect_msg);
+                                        byte[] disconnect_data = System.Text.Encoding.ASCII.GetBytes(disconnect_msg);
 
 
                                         NetworkStream clientstream = id_lastOne.Value.GetStream();
-                                        clientstream.Write(disconnect_data, 0, data.Length);
+                                        clientstream.Write(disconnect_data, 0, disconnect_data.Length);
                                     }
                                 }
 

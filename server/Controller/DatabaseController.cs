@@ -75,9 +75,12 @@ namespace server.Controller
                     {
                         string res = String.Format("{0}", reader[0]);
 
-                        Console.WriteLine(res[0]);
+                        Console.WriteLine("DBpassword: " + res + "|");
+                        Console.WriteLine("OGpassword: " + password + "|");
                         reader.Close();
 
+
+                        Console.WriteLine(String.Compare(password,res));
                         return (res == password);
                     }
                     else
@@ -89,7 +92,7 @@ namespace server.Controller
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("Database error: " + ex.Message);
                     return false;
                 }
             }

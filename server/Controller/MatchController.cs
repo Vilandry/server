@@ -55,23 +55,27 @@ namespace server.Controller
 
                 try
                 {
-                    int buffersize = 1024;
-                    byte[] data = new byte[1024];
-                    ns.Read(data, 0, buffersize);
 
 
-                    string raw_info = System.Text.Encoding.UTF8.GetString(data);
+
+                    string raw_info = Utility.ReadFromNetworkStream(ns);
+                    Console.WriteLine("Raw info: " + raw_info);
 
                     MatchUser joineduser = RecreateUser(raw_info);
                     joineduser.Client = client;
 
                     Console.WriteLine("Joined " + joineduser.ToString());
 
-                    byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("OK");
+                    byte[] data = System.Text.Encoding.ASCII.GetBytes("OK");
                     Console.WriteLine("replied with OK");
-                    ns.Write(okmsg, 0, okmsg.Length);
 
-                    clients.Add(joineduser);
+                    ns.Write(data, 0, data.Length);
+                    Console.WriteLine(System.Text.Encoding.UTF8.GetString(data));
+
+                    lock(llock)
+                    {
+                        clients.Add(joineduser);
+                    }                   
                 }
                 catch(Exception e)
                 {
@@ -106,28 +110,114 @@ namespace server.Controller
                         int port = PortManager.instance().GetPrivateChatPort();
                         if(port == -1)
                         {
-                            Console.WriteLine("No available port, no match will happen! Consider restarting the server with a wilder area of ports.");
+                            Console.WriteLine("No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
+                            Thread.Sleep(1000);
                             continue;
                         }
 
                         string portString = "" + port;
-                        Byte[] portdata = System.Text.Encoding.ASCII.GetBytes(portString);
-
-                        NetworkStream portstream = curUser.Client.GetStream();
-                        portstream.Write(portdata, 0, portdata.Length);
-
-                        portstream = candidate.Client.GetStream();
-                        portstream.Write(portdata, 0, portdata.Length);
+                        byte[] portdata = System.Text.Encoding.ASCII.GetBytes(portString);
                         Console.WriteLine("The following port will be used for match: " + port);
+
+                        NetworkStream curuserStream = curUser.Client.GetStream();
+                        NetworkStream candidatestream = candidate.Client.GetStream();
+
+                        ///First attempt to reach the client with the portdata
+                        try
+                        {
+                            curuserStream.Write(portdata, 0, portdata.Length);
+                            Console.WriteLine("Portnum " + port + " sent to the client!");
+                        }
+                        catch (Exception e) ///if we lost the first one, reach out the second one, and remove the first
+                        {
+                            Console.WriteLine("Error during matchmaking: couldnt reach client, error message: " + e.Message);
+                            clients.RemoveAt(i);
+                            i--;
+                            PortManager.instance().ReturnPrivateChatPort(port);
+
+                            try 
+                            {
+                                byte[] ermsg = System.Text.Encoding.ASCII.GetBytes("ER");
+                                candidatestream.Write(ermsg, 0, ermsg.Length);
+                            }
+                            catch (Exception f) ///if we lost that one too, remove it too
+                            {
+                                Console.WriteLine("Error during matchmaking: couldnt reach candidate, error message: " + f.Message);
+                                clients.RemoveAt(j-1);
+                            }
+                            break;
+                        }
+
+                        Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
+                        ///First attempt to reach the candidate with the portdata
+                        try
+                        {
+                            candidatestream.Write(portdata, 0, portdata.Length);
+                            Console.WriteLine("Portnum " + port + " sent to the candidate!");
+                        }
+                        catch (Exception e) ///if we lost the candidate
+                        {
+                            Console.WriteLine("Error during matchmaking: couldnt reach candidate, error message: " + e.Message);
+                            clients.RemoveAt(j);
+                            PortManager.instance().ReturnPrivateChatPort(port);
+
+                            try
+                            {
+                                byte[] ermsg = System.Text.Encoding.ASCII.GetBytes("ER");
+                                curuserStream.Write(ermsg, 0, ermsg.Length);
+                            }
+                            catch (Exception f) ///if we lost the original meanwhile
+                            {
+                                Console.WriteLine("Error during matchmaking: couldnt reach client, error message: " + f.Message);
+                                clients.RemoveAt(i);
+                                i--;
+                                break;
+                            }
+
+                            continue;
+                        }
+
+
+                        Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
+                        ///send the next amount of data: the verifying
+                        ///start with the client
+                        try
+                        {
+                            byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("OK");
+                            curuserStream.Write(okmsg, 0, okmsg.Length);
+                            Console.WriteLine("Okmsg sent to the client!");
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("Error during matchmaking: the client left during that little timestamp " + e.Message);
+                        }
+
+                        Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
+                        ///then to the candidate
+                        try
+                        {
+                            byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("OK");
+                            candidatestream.Write(okmsg, 0, okmsg.Length);
+                            Console.WriteLine("Okmsg sent to the candidate!");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error during matchmaking: the candidate left during that little timestamp " + e.Message);
+                        }
 
                         PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
                         Thread privateChatThread = new Thread(pcc.handleConnecting);
 
                         privateChatThread.Start();
 
-                        clients.RemoveAt(i); ///ok tbh it kinda looks scray
-                        clients.RemoveAt(j);
-                        break;
+                        lock(llock)
+                        {
+                            
+                            clients.RemoveAt(i); ///ok tbh it kinda looks scray
+                            clients.RemoveAt(j-1);
+                            i--;
+                            break;
+                        }
                     }
                 }
             }

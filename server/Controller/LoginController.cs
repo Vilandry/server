@@ -37,44 +37,36 @@ namespace server.Controller
             while (true)
             {
                 // Buffer for reading data
-                Byte[] bytes = new Byte[256];
-                String data = null;
+                byte[] bytes = new Byte[256];
+                string message = null;
                 TcpClient client = new TcpClient();
 
                 try
                 {
                     client = server.AcceptTcpClient();
-
-                    Console.WriteLine("here we go");
-
                     NetworkStream stream = client.GetStream();
 
-                    int i, byteCount = 0;                   
-
-                    // Loop to receive all the data sent by the client.
-                    do
-                    {
-                        //Console.WriteLine("here");
-                        i = stream.Read(bytes, 0, bytes.Length);
-                        // Translate data bytes to a ASCII string.
-                        data = System.Text.Encoding.ASCII.GetString(bytes, byteCount, i);
-                        byteCount += i;
-                        Console.WriteLine("Received: {0}", data);
-                        Console.WriteLine(i.ToString());
+                    message = Utility.ReadFromNetworkStream(stream);
+                    Console.WriteLine("Recieved during login: " + message);
 
 
-                    } while (i >= bytes.Length); ///this means, we read less than we could have, so we read all
+                    ///<<------------------->>///
+
+                    /*int buffersize = 256;
+                    byte[] data = new byte[buffersize];
+                    stream.Read(data, 0, buffersize);
+                    message = System.Text.Encoding.ASCII.GetString(data);
+                    Console.WriteLine("Recieved during login: " + message);*/
 
 
                     // Process the data sent by the client.
-                    string[] raw_text = data.Split("|");
+                    string[] raw_text = message.Split("|");
                     bool success = false;
                     string username = "";
 
                     if (raw_text[0] == "LOGIN")
                     {
                         username = raw_text[1];
-                        Console.WriteLine(raw_text[2]);
                         string password = raw_text[2];
 
                         success = DatabaseController.instance().successfulLogin(username, password);
@@ -108,8 +100,7 @@ namespace server.Controller
 
                     // Send back a response.
                     stream.Write(msg, 0, msg.Length);
-                    stream.Close();
-                    Console.WriteLine("Sent: {0}", log);
+                    Console.WriteLine("Sent: " + log);
 
                     
                 }
