@@ -42,13 +42,13 @@ namespace server.Controller
             connection = new SqlConnection(constr);
         }
 
-        public MatchUser loadSUser(string username, string password)
+        /*public MatchUser loadSUser(string username, string password)
         {
             MatchUser dsUser = new MatchUser();
 
 
             return dsUser;
-        }
+        }*/
 
 
         public bool successfulLogin(string username, string password)
@@ -69,14 +69,14 @@ namespace server.Controller
                     }
                     /*string rowsAffected = command.ExecuteReader().ToString();
                     Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
-                    object o = command.ExecuteScalar();
-
-                    if (o != null)
+                    SqlDataReader reader = command.ExecuteReader();
+                    reader.Read();
+                    if (reader != null)
                     {
-                        string res = o.ToString();
+                        string res = String.Format("{0}", reader[0]);
 
-                        Console.WriteLine(res);
-
+                        Console.WriteLine(res[0]);
+                        reader.Close();
 
                         return (res == password);
                     }
@@ -92,12 +92,54 @@ namespace server.Controller
                     Console.WriteLine(ex.Message);
                     return false;
                 }
-                finally
-                {
-                    //connection.Close();
-                }
             }
             
+        }
+
+        public string GetAgeAndGender(string username)
+        {
+            lock (llock)
+            {
+                string commandText = "SELECT AGE, GENDER FROM Users WHERE username = @username_param";
+
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@username_param", username);
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    SqlDataReader reader = command.ExecuteReader();
+                    
+                    if (reader != null)
+                    {
+                        reader.Read();
+                        string res = String.Format("{0}|{1}", reader[0],reader[1]);
+
+                        Console.WriteLine(res);
+                        reader.Close();
+
+                        return res;
+                    }
+                    else
+                    {
+                        Console.WriteLine("not registered, so couldnt retrive age and gender!");
+                        return "";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return "";
+                }
+            }
+
         }
 
         public bool successfulRegister(string username, string password, int age, int sex)
@@ -128,7 +170,7 @@ namespace server.Controller
                     {
                         TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
                         int curtime = (int)t.TotalSeconds;
-                        string insertText = "INSERT INTO Users Values (@uname, @pwd, NULL, @age, @sex, @curtime)";
+                        string insertText = "INSERT INTO Users Values (@uname, @pwd, NULL, @sex, @age, @curtime)";
 
                         command = new SqlCommand(insertText, connection);
                         command.Parameters.AddWithValue("@uname", username);

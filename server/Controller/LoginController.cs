@@ -69,10 +69,11 @@ namespace server.Controller
                     // Process the data sent by the client.
                     string[] raw_text = data.Split("|");
                     bool success = false;
+                    string username = "";
 
                     if (raw_text[0] == "LOGIN")
                     {
-                        string username = raw_text[1];
+                        username = raw_text[1];
                         Console.WriteLine(raw_text[2]);
                         string password = raw_text[2];
 
@@ -80,7 +81,7 @@ namespace server.Controller
                     }
                     else if (raw_text[0] == "REGISTER")
                     {
-                        string username = raw_text[1];
+                        username = raw_text[1];
                         string password = raw_text[2];
                         int age = Int32.Parse(raw_text[3]);
                         int sex = Int32.Parse(raw_text[4]);
@@ -91,14 +92,17 @@ namespace server.Controller
                     byte[] msg;
                     string log;
                     if (success)
-                    {
-                        msg = System.Text.Encoding.ASCII.GetBytes("OK");
-                        log = "OK";
+                    {                        
+                        log = "OK|";
+                        log = log + DatabaseController.instance().GetAgeAndGender(username);
+                        msg = System.Text.Encoding.ASCII.GetBytes(log);
+
+                        Console.WriteLine(log);
                     }
                     else
-                    {
-                        msg = System.Text.Encoding.ASCII.GetBytes("ER");
-                        log = "ER";
+                    {                     
+                        log = "ER|-1|-1";
+                        msg = System.Text.Encoding.ASCII.GetBytes(log);
                     }
 
 

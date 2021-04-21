@@ -67,7 +67,8 @@ namespace server.Controller
 
                     Console.WriteLine("Joined " + joineduser.ToString());
 
-                    byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("ok");
+                    byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("OK");
+                    Console.WriteLine("replied with OK");
                     ns.Write(okmsg, 0, okmsg.Length);
 
                     clients.Add(joineduser);
@@ -117,7 +118,7 @@ namespace server.Controller
 
                         portstream = candidate.Client.GetStream();
                         portstream.Write(portdata, 0, portdata.Length);
-
+                        Console.WriteLine("The following port will be used for match: " + port);
 
                         PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
                         Thread privateChatThread = new Thread(pcc.handleConnecting);
@@ -126,7 +127,6 @@ namespace server.Controller
 
                         clients.RemoveAt(i); ///ok tbh it kinda looks scray
                         clients.RemoveAt(j);
-                        i--;
                         break;
                     }
                 }

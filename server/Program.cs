@@ -11,14 +11,19 @@ namespace server
     {
         static void Main(string[] args)
         {
-            LoginController lc = LoginController.instance();
             DatabaseController dc = DatabaseController.instance();
+            LoginController lc = LoginController.instance();
             MatchController mc = MatchController.instance();
 
             Thread login = new Thread(lc.logincontrol);
             login.Start();
 
             Thread match = new Thread(mc.handleRequests);
+            match.Start();
+
+            //string res = dc.GetAgeAndGender("theVilandry");
+            //Console.WriteLine(res);
+            
 
             //dc.successfulRegister("admin", "admin".GetHashCode().ToString(), 1, 1);
 
