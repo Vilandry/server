@@ -87,14 +87,14 @@ namespace server.Controller
                     {                        
                         log = "OK|";
                         log = log + DatabaseController.instance().GetAgeAndGender(username);
-                        msg = System.Text.Encoding.ASCII.GetBytes(log);
+                        msg = Encoding.Unicode.GetBytes(log);
 
                         Console.WriteLine(log);
                     }
                     else
                     {                     
                         log = "ER|-1|-1";
-                        msg = System.Text.Encoding.ASCII.GetBytes(log);
+                        msg = Encoding.Unicode.GetBytes(log);
                     }
 
 

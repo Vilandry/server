@@ -24,7 +24,7 @@ namespace server.Controller
 
         public static MatchController instance()
         {
-            if(inst == null)
+            if (inst == null)
             {
                 inst = new MatchController();
             }
@@ -47,6 +47,8 @@ namespace server.Controller
 
             server.Start();
 
+            Thread commandThread = new Thread(handleInputCommands);
+            commandThread.Start();
 
             while (true)
             {
@@ -55,32 +57,37 @@ namespace server.Controller
 
                 try
                 {
-
-
-
                     string raw_info = Utility.ReadFromNetworkStream(ns);
                     Console.WriteLine("Raw info: " + raw_info);
 
-                    MatchUser joineduser = RecreateUser(raw_info);
-                    joineduser.Client = client;
-
-                    Console.WriteLine("Joined " + joineduser.ToString());
-
-                    byte[] data = System.Text.Encoding.ASCII.GetBytes("OK");
-                    Console.WriteLine("replied with OK");
-
-                    ns.Write(data, 0, data.Length);
-                    Console.WriteLine(System.Text.Encoding.UTF8.GetString(data));
-
-                    lock(llock)
+                    if (raw_info[0] == '!')
                     {
-                        clients.Add(joineduser);
-                    }                   
+                        handleCommands(raw_info);
+                    }
+                    else
+                    {
+                        MatchUser joineduser = RecreateUser(raw_info);
+                        joineduser.Client = client;
+
+                        Console.WriteLine("Joined " + joineduser.ToString());
+
+                        byte[] data = Encoding.Unicode.GetBytes("OK");
+
+                        ns.Write(data, 0, data.Length);
+                        Console.WriteLine("Replied with " + Encoding.Unicode.GetString(data));
+
+                        lock (llock)
+                        {
+                            clients.Add(joineduser);
+                        }
+                    }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Exception in MatchManaging, error message: " + e.Message);
                 }
+
+
 
                 handleMatches();
             }
@@ -108,7 +115,7 @@ namespace server.Controller
 
 
                         int port = PortManager.instance().GetPrivateChatPort();
-                        if(port == -1)
+                        if (port == -1)
                         {
                             Console.WriteLine("No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
                             Thread.Sleep(1000);
@@ -116,7 +123,7 @@ namespace server.Controller
                         }
 
                         string portString = "" + port;
-                        byte[] portdata = System.Text.Encoding.ASCII.GetBytes(portString);
+                        byte[] portdata = Encoding.Unicode.GetBytes(portString);
                         Console.WriteLine("The following port will be used for match: " + port);
 
                         NetworkStream curuserStream = curUser.Client.GetStream();
@@ -135,21 +142,21 @@ namespace server.Controller
                             i--;
                             PortManager.instance().ReturnPrivateChatPort(port);
 
-                            try 
+                            try
                             {
-                                byte[] ermsg = System.Text.Encoding.ASCII.GetBytes("ER");
+                                byte[] ermsg = Encoding.Unicode.GetBytes("ER");
                                 candidatestream.Write(ermsg, 0, ermsg.Length);
                             }
                             catch (Exception f) ///if we lost that one too, remove it too
                             {
                                 Console.WriteLine("Error during matchmaking: couldnt reach candidate, error message: " + f.Message);
-                                clients.RemoveAt(j-1);
+                                clients.RemoveAt(j - 1);
                             }
                             break;
                         }
 
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
-                        ///First attempt to reach the candidate with the portdata
+                                           ///First attempt to reach the candidate with the portdata
                         try
                         {
                             candidatestream.Write(portdata, 0, portdata.Length);
@@ -163,7 +170,7 @@ namespace server.Controller
 
                             try
                             {
-                                byte[] ermsg = System.Text.Encoding.ASCII.GetBytes("ER");
+                                byte[] ermsg = Encoding.Unicode.GetBytes("ER");
                                 curuserStream.Write(ermsg, 0, ermsg.Length);
                             }
                             catch (Exception f) ///if we lost the original meanwhile
@@ -179,24 +186,24 @@ namespace server.Controller
 
 
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
-                        ///send the next amount of data: the verifying
-                        ///start with the client
+                                           ///send the next amount of data: the verifying
+                                           ///start with the client
                         try
                         {
-                            byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("OK");
+                            byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                             curuserStream.Write(okmsg, 0, okmsg.Length);
                             Console.WriteLine("Okmsg sent to the client!");
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             Console.WriteLine("Error during matchmaking: the client left during that little timestamp " + e.Message);
                         }
 
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
-                        ///then to the candidate
+                                           ///then to the candidate
                         try
                         {
-                            byte[] okmsg = System.Text.Encoding.ASCII.GetBytes("OK");
+                            byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                             candidatestream.Write(okmsg, 0, okmsg.Length);
                             Console.WriteLine("Okmsg sent to the candidate!");
                         }
@@ -210,11 +217,11 @@ namespace server.Controller
 
                         privateChatThread.Start();
 
-                        lock(llock)
+                        lock (llock)
                         {
-                            
+
                             clients.RemoveAt(i); ///ok tbh it kinda looks scray
-                            clients.RemoveAt(j-1);
+                            clients.RemoveAt(j - 1);
                             i--;
                             break;
                         }
@@ -234,7 +241,7 @@ namespace server.Controller
             try
             {
                 queued = new MatchUser();
-                
+
                 ///FORMAT: Username|age|sex|lookingforsex
 
                 string[] info = raw_info.Split("|");
@@ -248,7 +255,7 @@ namespace server.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("RecreateUser error, error message: " + e.Message);
             }
 
 
@@ -285,6 +292,76 @@ namespace server.Controller
                 }
             }
             return success;
+        }
+
+        private bool removeFromClientList(string username)
+        {
+            bool retval = false;
+            lock (llock)
+            {
+                MatchUser needle = new MatchUser();
+                foreach (MatchUser user in clients)
+                {
+                    if (user.Username == username)
+                    {
+                        needle = user;
+                    }
+                }
+
+
+                return clients.Remove(needle);
+            }
+        }
+
+        private void handleInputCommands()
+        {
+            while (true)
+            {
+                //Console.WriteLine("|");
+                lock (llock)
+                {
+                    foreach (MatchUser source in clients)
+                    {
+                        //Console.WriteLine(",");
+                        NetworkStream stream = source.Client.GetStream();
+                        if (stream.DataAvailable)
+                        {
+                            string data = Utility.ReadFromNetworkStream(stream);
+
+                            if (data[0] == '!')
+                            {
+                                handleCommands(data);
+                                break;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Misc. data from " + source.Username + ", data: " + data);
+                            }
+                        }
+                    }
+                }
+                Thread.Sleep(100);
+            }
+        }
+
+        private void handleCommands(string command)
+        {
+            string[] commandargs = command.Split("|");
+            if (commandargs[0] == "!LEAVE")
+            {
+                if (removeFromClientList(commandargs[1]))
+                {
+                    Console.WriteLine(commandargs[1] + " succesfully removed from clientlist!");
+                }
+                else
+                {
+                    Console.WriteLine(commandargs[1] + " couldnt be removed from clientlist!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("unknown command!");
+            }
         }
 
     }

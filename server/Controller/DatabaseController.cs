@@ -79,8 +79,6 @@ namespace server.Controller
                         Console.WriteLine("OGpassword: " + password + "|");
                         reader.Close();
 
-
-                        Console.WriteLine(String.Compare(password,res));
                         return (res == password);
                     }
                     else
@@ -124,7 +122,6 @@ namespace server.Controller
                         reader.Read();
                         string res = String.Format("{0}|{1}", reader[0],reader[1]);
 
-                        Console.WriteLine(res);
                         reader.Close();
 
                         return res;

@@ -31,7 +31,7 @@ namespace server.Controller
         }
 
 
-
+        
 
         public void handleConnecting()
         {
@@ -83,46 +83,87 @@ namespace server.Controller
                             string message = Utility.ReadFromNetworkStream(stream);
                             Console.WriteLine(message);
 
-                            foreach (KeyValuePair<int, TcpClient> id_destination in clients)
+                            if (message[0] == '!')
                             {
-                                int id = id_destination.Key;
-                                //if (id == parentId) { continue; }
-
-                                TcpClient destination = id_destination.Value;
-                                NetworkStream channel = destination.GetStream();
-                                try
-                                {
-                                    byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
-                                    channel.Write(data, 0, data.Length);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine("Exception during private chat on port " + portnum + "error message: " + e.Message + ". Client removed from clients");
-                                    clients.Remove(id, out destination);
-                                    count--;
-
-                                    if(type == CHATTPYE.PRIVATE)
-                                    {
-                                        PortManager.instance().ReturnPrivateChatPort(portnum);                                       
-                                    }
-                                    ///send out that smbd has disconnected
-                                    foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
-                                    {
-                                        string disconnect_msg = "Your partner has disconnected!";
-                                        byte[] disconnect_data = System.Text.Encoding.ASCII.GetBytes(disconnect_msg);
-
-
-                                        NetworkStream clientstream = id_lastOne.Value.GetStream();
-                                        clientstream.Write(disconnect_data, 0, disconnect_data.Length);
-                                    }
-                                }
-
+                                handleCommands(message);
                             }
+                            else
+                            {
+                                foreach (KeyValuePair<int, TcpClient> id_destination in clients)
+                                {
+                                    int id = id_destination.Key;
+                                    //if (id == parentId) { continue; }
+
+                                    TcpClient destination = id_destination.Value;
+                                    NetworkStream channel = destination.GetStream();
+                                    try
+                                    {
+                                        byte[] data = Encoding.Unicode.GetBytes(message);
+                                        Console.WriteLine("writing...");
+                                        channel.Write(data, 0, data.Length);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Console.WriteLine("Exception during private chat on port " + portnum + "error message: " + e.Message + ". Client removed from clients");
+                                        clients.Remove(id, out destination);
+                                        count--;
+
+
+                                        ///send out that smbd has disconnected
+                                        if (type == CHATTPYE.PRIVATE)
+                                        {
+                                            PortManager.instance().ReturnPrivateChatPort(portnum);
+                                            foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
+                                            {
+                                                string disconnect_msg = "Your partner has disconnected!";
+                                                byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
+
+
+                                                NetworkStream clientstream = id_lastOne.Value.GetStream();
+                                                clientstream.Write(disconnect_data, 0, disconnect_data.Length);
+                                            }
+                                            return;
+                                        }
+                                        else if (type == CHATTPYE.GROUP)
+                                        {
+                                            foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
+                                            {
+                                                string disconnect_msg = "Your partner has disconnected!";
+                                                byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
+
+
+                                                NetworkStream clientstream = id_lastOne.Value.GetStream();
+                                                clientstream.Write(disconnect_data, 0, disconnect_data.Length);
+                                            }
+                                        }
+                                    }
+                                }
+                            }                                                  
                         }
                     }
                 }
 
                 Thread.Sleep(100);
+            }
+        }
+
+        private void handleCommands(string command)
+        {
+            string[] commandargs = command.Split("|");
+            if(commandargs[0] == "!LEAVE")
+            {
+                foreach(KeyValuePair<int, TcpClient> id_destination in clients)
+                {
+                    TcpClient destination = id_destination.Value;
+                    NetworkStream stream = destination.GetStream();
+                    string disconnect_msg = commandargs[1] + " has disconnected!";
+                    byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
+                    stream.Write(disconnect_data, 0, disconnect_data.Length);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Unknown command!");
             }
         }
     }
