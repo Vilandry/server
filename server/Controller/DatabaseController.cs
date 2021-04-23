@@ -75,15 +75,15 @@ namespace server.Controller
                     {
                         string res = String.Format("{0}", reader[0]);
 
-                        Console.WriteLine("DBpassword: " + res + "|");
-                        Console.WriteLine("OGpassword: " + password + "|");
+                        /*Console.WriteLine("DBpassword: " + res + "|");
+                        Console.WriteLine("OGpassword: " + password + "|");*/
                         reader.Close();
 
                         return (res == password);
                     }
                     else
                     {
-                        Console.WriteLine("not registered!");
+                        Console.WriteLine(username + " was not registered!");
                         return false;
                     }
 
@@ -128,7 +128,7 @@ namespace server.Controller
                     }
                     else
                     {
-                        Console.WriteLine("not registered, so couldnt retrive age and gender!");
+                        Console.WriteLine(username + " was not registered, so couldnt retrive age and gender!");
                         return "";
                     }
 

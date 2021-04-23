@@ -48,13 +48,13 @@ namespace server.Controller
                 while (ongoing)
                 {
                     TcpClient client = server.AcceptTcpClient();
-                    Console.WriteLine("A private chat has started!");
+                    Console.WriteLine("A client has joined to the private chat on port " + portnum);
                     lock (llock)
                     {
                         bool success = clients.TryAdd(id, client);
                         if (!success)
                         {
-                            Console.WriteLine("something shit happened");
+                            Console.WriteLine("Couldnt add the joining client to the clientlist on port " + portnum);
                         }
                     }
 
@@ -64,7 +64,7 @@ namespace server.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("Error on port " + portnum + ", error message: " + e.Message);
             }
 
         }
@@ -157,6 +157,7 @@ namespace server.Controller
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine("Exception: " + e.Message + ", removing the dead client");
                     RemoveDeadClient(id_lastOne.Key, id_lastOne.Value);
                 }
 
@@ -166,7 +167,7 @@ namespace server.Controller
         private void handleCommands(string command)
         {
             string[] commandargs = command.Split("|");
-            Console.WriteLine("HandleCommand: " + command);
+            Console.WriteLine("HandleCommand: " + command + " on portnum " + portnum);
             if(commandargs[0] == "!LEAVE")
             {
                 foreach(KeyValuePair<int, TcpClient> id_destination in clients)
@@ -181,7 +182,7 @@ namespace server.Controller
             }
             else
             {
-                Console.WriteLine("Unknown command!");
+                Console.WriteLine("Unknown command arrived on portnum " + portnum);
             }
         }
     }

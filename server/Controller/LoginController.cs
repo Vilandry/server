@@ -89,7 +89,7 @@ namespace server.Controller
                         log = log + DatabaseController.instance().GetAgeAndGender(username);
                         msg = Encoding.Unicode.GetBytes(log);
 
-                        Console.WriteLine(log);
+                        Console.WriteLine("Successful login, login data: " + log);
                     }
                     else
                     {                     
@@ -100,13 +100,13 @@ namespace server.Controller
 
                     // Send back a response.
                     stream.Write(msg, 0, msg.Length);
-                    Console.WriteLine("Sent: " + log);
+                    Console.WriteLine(log + "data was sent to the client!");
 
                     
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine(e.Message + "\nso probably someone left");
+                    Console.WriteLine("Exception: " + e.Message + ", so probably someone left");
                 }
                 finally
                 {

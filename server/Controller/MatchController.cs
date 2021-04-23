@@ -272,6 +272,11 @@ namespace server.Controller
         /// <returns></returns>
         private bool lookingForThem(MatchUser curUser, MatchUser candidate)
         {
+            if(curUser.Username == candidate.Username) ///if we spam the start and stop searching button
+            {
+                return false;
+            }
+
             bool success = (candidate.Age == curUser.Age); ///first step
 
             success = success && (candidate.Sex == curUser.LookingForSex || curUser.LookingForSex == GENDER.ANY); ///we are cool if the candidate is in the gender we are looking for OR if we dont care about it at all
@@ -296,21 +301,23 @@ namespace server.Controller
 
         private bool removeFromClientList(string username)
         {
-            bool retval = false;
+            int i = -1;
             lock (llock)
-            {
+            {                
                 MatchUser needle = new MatchUser();
-                foreach (MatchUser user in clients)
+                do
                 {
-                    if (user.Username == username)
+                    i++;
+                    foreach (MatchUser user in clients)
                     {
-                        needle = user;
+                        if (user.Username == username)
+                        {
+                            needle = user;
+                        }
                     }
-                }
-
-
-                return clients.Remove(needle);
+                } while (clients.Remove(needle));                              
             }
+            return (i > 0);
         }
 
         private void handleInputCommands()
@@ -360,7 +367,7 @@ namespace server.Controller
             }
             else
             {
-                Console.WriteLine("unknown command!");
+                Console.WriteLine("MatchController: unknown command " + command);
             }
         }
 
