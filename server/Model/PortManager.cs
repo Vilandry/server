@@ -16,6 +16,8 @@ namespace server.Model
         private int matchport;
         private int loginport;
         private int infoport;
+        private int miscport;
+
 
         public static PortManager instance()
         {
@@ -95,5 +97,6 @@ namespace server.Model
         public int Matchport { get { return matchport; } }
         public int Loginport { get { return loginport; } }
         public int Infoport { get { return infoport; } }
+        public int Miscport { get { return miscport; } }
     }
 }

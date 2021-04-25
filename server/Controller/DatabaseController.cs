@@ -33,8 +33,10 @@ namespace server.Controller
 
         private DatabaseController()
         {
-            string src = "Data Source=(LocalDB)\\MSSQLLocalDB"; 
-            string path = "C:\\Users\\Kiss Ádám\\Desktop\\Szakdolgozat\\server\\server\\Database\\KnocKnock.mdf";
+            //string configpath = @"..\config\database.conf";
+
+            string src = "Data Source=(LocalDB)\\MSSQLLocalDB";
+            string path = "/home/adam0801k";
 
             string constr = src + ";AttachDbFilename=" + path + ";Integrated Security=True";
 
@@ -50,6 +52,48 @@ namespace server.Controller
             return dsUser;
         }*/
 
+        public bool alreadySavedChatHistory(string historyname)
+        {
+            bool alreadySaved = true;
+
+            string commandText = "SELECT COUNT(*) FROM HistoryConnector WHERE ChatName = @historyname_param";
+            SqlCommand command = new SqlCommand(commandText, connection);
+            try
+            {
+                if (!(connection.State == ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                
+                SqlDataReader reader = command.ExecuteReader();
+                reader.Read();
+                if (reader != null)
+                {
+                    string res = String.Format("{0}", reader[0]);
+                    int numberOfInserted = int.Parse(res);
+                    Console.WriteLine("History was inserted " + numberOfInserted + " (" + res + ")");
+
+                    /*Console.WriteLine("DBpassword: " + res + "|");
+                    Console.WriteLine("OGpassword: " + password + "|");*/
+                    reader.Close();
+
+                    return (numberOfInserted > 0);
+                }
+                else
+                {
+                    reader.Close();
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Database error: " + ex.Message);
+                return false;
+            }
+
+            return alreadySaved;
+        }
 
         public bool successfulLogin(string username, string password)
         {
@@ -83,6 +127,7 @@ namespace server.Controller
                     }
                     else
                     {
+                        reader.Close();
                         Console.WriteLine(username + " was not registered!");
                         return false;
                     }
@@ -121,23 +166,25 @@ namespace server.Controller
                     {
                         reader.Read();
                         string res = String.Format("{0}|{1}", reader[0],reader[1]);
-
                         reader.Close();
+                        
 
                         return res;
                     }
                     else
                     {
                         Console.WriteLine(username + " was not registered, so couldnt retrive age and gender!");
+                        reader.Close();
                         return "";
                     }
+
 
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     return "";
-                }
+                }                
             }
 
         }

@@ -16,6 +16,7 @@ namespace server.Controller
     {
         private static readonly object llock = new object();
         private static ConcurrentDictionary<int, TcpClient> clients;
+        private List<string> conversationHistory;
         private int count;
         private int id;
         private int portnum;
@@ -30,6 +31,7 @@ namespace server.Controller
             portnum = port;
             server = new TcpListener(IPAddress.Any, portnum);
             clients = new ConcurrentDictionary<int, TcpClient>();
+            conversationHistory = new List<string>();
             type = t;
             ongoing = true;
         }
@@ -87,6 +89,7 @@ namespace server.Controller
 
                             string message = Utility.ReadFromNetworkStream(stream);
                             Console.WriteLine(message);
+                            conversationHistory.Add(Utility.EscapePrivateChat(message));
 
                             if (message[0] == '!')
                             {

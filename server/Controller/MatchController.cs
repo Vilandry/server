@@ -188,9 +188,12 @@ namespace server.Controller
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
                                            ///send the next amount of data: the verifying
                                            ///start with the client
+
+                        string conversationid = "OK|" + curUser.Username + "|" + DateTime.Now + "|" + candidate.Username;
+                        byte[] okmsg = Encoding.Unicode.GetBytes(conversationid);
                         try
                         {
-                            byte[] okmsg = Encoding.Unicode.GetBytes("OK");
+                            //byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                             curuserStream.Write(okmsg, 0, okmsg.Length);
                             Console.WriteLine("Okmsg sent to the client!");
                         }
@@ -201,9 +204,11 @@ namespace server.Controller
 
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
                                            ///then to the candidate
+                                           
+                        
                         try
                         {
-                            byte[] okmsg = Encoding.Unicode.GetBytes("OK");
+                            //byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                             candidatestream.Write(okmsg, 0, okmsg.Length);
                             Console.WriteLine("Okmsg sent to the candidate!");
                         }

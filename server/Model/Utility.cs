@@ -11,6 +11,15 @@ namespace server.Model
     public static class Utility
     {
 
+        public static string EscapePrivateChat(string history)
+        {
+            history.Replace("<e>", "<e><e>"); ///<e> is escape, <f> is newline
+            history.Replace("<f>", "<e><f>");
+            history.Replace("\n", "<f>");
+
+
+            return history;
+        }
 
 
         public static string ReadFromNetworkStream(NetworkStream stream)
