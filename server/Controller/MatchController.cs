@@ -110,21 +110,21 @@ namespace server.Controller
                     if (success)
                     {
                         ///create a new instance of privatechat-controller, and match them
-                        Console.WriteLine("ITS A MATCH! Matched " + curUser.Username + " WITH " + candidate.Username + "!");
+                        Console.WriteLine("MatchController: ITS A MATCH! Matched " + curUser.Username + " WITH " + candidate.Username + "!");
 
 
 
                         int port = PortManager.instance().GetPrivateChatPort();
                         if (port == -1)
                         {
-                            Console.WriteLine("No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
+                            Console.WriteLine("MatchController: No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
                             Thread.Sleep(1000);
                             continue;
                         }
 
                         string portString = "" + port;
                         byte[] portdata = Encoding.Unicode.GetBytes(portString);
-                        Console.WriteLine("The following port will be used for match: " + port);
+                        Console.WriteLine("MatchController: The following port will be used for match: " + port);
 
                         NetworkStream curuserStream = curUser.Client.GetStream();
                         NetworkStream candidatestream = candidate.Client.GetStream();
@@ -133,11 +133,11 @@ namespace server.Controller
                         try
                         {
                             curuserStream.Write(portdata, 0, portdata.Length);
-                            Console.WriteLine("Portnum " + port + " sent to the client!");
+                            Console.WriteLine("MatchController: Portnum " + port + " sent to the client!");
                         }
                         catch (Exception e) ///if we lost the first one, reach out the second one, and remove the first
                         {
-                            Console.WriteLine("Error during matchmaking: couldnt reach client, error message: " + e.Message);
+                            Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach client, error message: " + e.Message);
                             clients.RemoveAt(i);
                             i--;
                             PortManager.instance().ReturnPrivateChatPort(port);
@@ -149,7 +149,7 @@ namespace server.Controller
                             }
                             catch (Exception f) ///if we lost that one too, remove it too
                             {
-                                Console.WriteLine("Error during matchmaking: couldnt reach candidate, error message: " + f.Message);
+                                Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach candidate, error message: " + f.Message);
                                 clients.RemoveAt(j - 1);
                             }
                             break;
@@ -164,7 +164,7 @@ namespace server.Controller
                         }
                         catch (Exception e) ///if we lost the candidate
                         {
-                            Console.WriteLine("Error during matchmaking: couldnt reach candidate, error message: " + e.Message);
+                            Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach candidate, error message: " + e.Message);
                             clients.RemoveAt(j);
                             PortManager.instance().ReturnPrivateChatPort(port);
 
@@ -175,7 +175,7 @@ namespace server.Controller
                             }
                             catch (Exception f) ///if we lost the original meanwhile
                             {
-                                Console.WriteLine("Error during matchmaking: couldnt reach client, error message: " + f.Message);
+                                Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach client, error message: " + f.Message);
                                 clients.RemoveAt(i);
                                 i--;
                                 break;
@@ -190,16 +190,17 @@ namespace server.Controller
                                            ///start with the client
 
                         string conversationid = "OK|" + curUser.Username + "|" + DateTime.Now + "|" + candidate.Username;
+                        Console.WriteLine("MatchController: okmessage: " + conversationid);
                         byte[] okmsg = Encoding.Unicode.GetBytes(conversationid);
                         try
                         {
                             //byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                             curuserStream.Write(okmsg, 0, okmsg.Length);
-                            Console.WriteLine("Okmsg sent to the client!");
+                            Console.WriteLine("MatchController: Okmsg sent to the client!");
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error during matchmaking: the client left during that little timestamp " + e.Message);
+                            Console.WriteLine("MatchController error: Error during matchmaking: the client left during that little timestamp " + e.Message);
                         }
 
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
@@ -210,11 +211,11 @@ namespace server.Controller
                         {
                             //byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                             candidatestream.Write(okmsg, 0, okmsg.Length);
-                            Console.WriteLine("Okmsg sent to the candidate!");
+                            Console.WriteLine("MatchController: Okmsg sent to the candidate!");
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error during matchmaking: the candidate left during that little timestamp " + e.Message);
+                            Console.WriteLine("MatchController: Error during matchmaking: the candidate left during that little timestamp " + e.Message);
                         }
 
                         PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
@@ -284,8 +285,8 @@ namespace server.Controller
 
             bool success = (candidate.Age == curUser.Age); ///first step
 
-            success = success && (candidate.Sex == curUser.LookingForSex || curUser.LookingForSex == GENDER.ANY); ///we are cool if the candidate is in the gender we are looking for OR if we dont care about it at all
-            success = success && (curUser.Sex == candidate.LookingForSex || candidate.LookingForSex == GENDER.ANY); ///and vice versa
+            success = success && (candidate.Sex == curUser.LookingForSex || curUser.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(curUser.Username, candidate.Username); ///we are cool if the candidate is in the gender we are looking for OR if we dont care about it at all
+            success = success && (curUser.Sex == candidate.LookingForSex || candidate.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(candidate.Username, curUser.Username); ///and vice versa
 
             if (success == false) ///then add it to the "unmatchable" group.
             {
@@ -334,22 +335,30 @@ namespace server.Controller
                 {
                     foreach (MatchUser source in clients)
                     {
-                        //Console.WriteLine(",");
-                        NetworkStream stream = source.Client.GetStream();
-                        if (stream.DataAvailable)
+                        try
                         {
-                            string data = Utility.ReadFromNetworkStream(stream);
+                            NetworkStream stream = source.Client.GetStream();
+                            if (stream.DataAvailable)
+                            {
+                                string data = Utility.ReadFromNetworkStream(stream);
 
-                            if (data[0] == '!')
-                            {
-                                handleCommands(data);
-                                break;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Misc. data from " + source.Username + ", data: " + data);
+                                if (data[0] == '!')
+                                {
+                                    handleCommands(data);
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("MatchController: Misc. data from " + source.Username + ", data: " + data);
+                                }
                             }
                         }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("MatchController error: could not reach client, removing from list. Error message: " + e.Message);
+                            clients.Remove(source);
+                        }
+                        
                     }
                 }
                 Thread.Sleep(100);

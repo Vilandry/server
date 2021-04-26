@@ -36,7 +36,8 @@ namespace server.Controller
             //string configpath = @"..\config\database.conf";
 
             string src = "Data Source=(LocalDB)\\MSSQLLocalDB";
-            string path = "/home/adam0801k";
+            string path = "C:\\Users\\Kiss Ádám\\Desktop\\Szakdolgozat\\server\\server\\Database\\KnocKnock.mdf";
+            //string path = "/home/adam0801k";
 
             string constr = src + ";AttachDbFilename=" + path + ";Integrated Security=True";
 
@@ -58,6 +59,7 @@ namespace server.Controller
 
             string commandText = "SELECT COUNT(*) FROM HistoryConnector WHERE ChatName = @historyname_param";
             SqlCommand command = new SqlCommand(commandText, connection);
+            command.Parameters.AddWithValue("@historyname_param", historyname);
             try
             {
                 if (!(connection.State == ConnectionState.Open))
@@ -71,7 +73,7 @@ namespace server.Controller
                 {
                     string res = String.Format("{0}", reader[0]);
                     int numberOfInserted = int.Parse(res);
-                    Console.WriteLine("History was inserted " + numberOfInserted + " (" + res + ")");
+                    Console.WriteLine("History was inserted " + numberOfInserted + " times. (res: " + res + ")");
 
                     /*Console.WriteLine("DBpassword: " + res + "|");
                     Console.WriteLine("OGpassword: " + password + "|");*/
@@ -118,12 +120,27 @@ namespace server.Controller
                     if (reader != null)
                     {
                         string res = String.Format("{0}", reader[0]);
+                        string pwd = String.Format("{0}", password);
 
                         /*Console.WriteLine("DBpassword: " + res + "|");
-                        Console.WriteLine("OGpassword: " + password + "|");*/
+                        Console.WriteLine("OGpassword: " + password + "|");
+                        Console.WriteLine("DB hash: " + res.GetHashCode());
+                        Console.WriteLine("OG hash: " + password.GetHashCode());
+                        Console.WriteLine("DB tostring hash: " + res.ToString().GetHashCode());
+                        Console.WriteLine("OG tostring hash: " + password.ToString().GetHashCode());
+                        Console.WriteLine("OG formatted hash: " + pwd.GetHashCode());
+
+                        Console.WriteLine("\n" + (pwd.Length == res.Length));
+                        for (int i=0; i<pwd.Length; i++)
+                        {
+                            Console.Write(pwd[i] == res[i]);
+                        }*/
+
+                        
+
                         reader.Close();
 
-                        return (res == password);
+                        return (Utility.passwordEquals(res, password));
                     }
                     else
                     {
@@ -140,6 +157,11 @@ namespace server.Controller
                 }
             }
             
+        }
+
+        public bool WasntBlockedBy(string blockedby, string blockedCandidate)
+        {
+            return true;
         }
 
         public string GetAgeAndGender(string username)

@@ -18,22 +18,23 @@ namespace server.Controller
         private static readonly object llock = new object();
         TcpListener server;
 
-        private static MiscController misc;
+        private static MiscController inst;
 
         private MiscController() { }
 
-        public MiscController inst()
+        public static MiscController instance()
         {
-            if(misc == null)
+            if(inst == null)
             {
-                misc = new MiscController();
+                inst = new MiscController();
             }
-            return misc;
+            return inst;
         }
 
         public void handleRequests()
         {
             server = new TcpListener(IPAddress.Any, PortManager.instance().Miscport);
+            server.Start();
 
             while(true)
             {
@@ -77,7 +78,24 @@ namespace server.Controller
                 }
                 else
                 {
+                    try
+                    {
+                        byte[] okmsg = Encoding.Unicode.GetBytes("INSERT");
+                        stream.Write(okmsg);
 
+
+                        Thread.Sleep(100);
+                        //Console.WriteLine("reading history...");
+                        string history = Utility.ReadFromNetworkStream(stream);
+                        Console.WriteLine(history);
+                        okmsg = Encoding.Unicode.GetBytes("OK");
+                        stream.Write(okmsg);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("MiscController error: could not reach client, error message" + e.Message);
+                        return;
+                    }
                 }
             }
         }

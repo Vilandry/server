@@ -21,19 +21,35 @@ namespace server.Model
             return history;
         }
 
+        public static bool passwordEquals(string ogpassword, string dbpassword)
+        {
+            bool success = true;
+            for(int i=0; i<Math.Min(ogpassword.Length,dbpassword.Length); i++)
+            {
+                success = success && (ogpassword[i] == dbpassword[i]);
+            }
+            return success;
+        }
+
 
         public static string ReadFromNetworkStream(NetworkStream stream)
         {
-            byte[] bytes = new Byte[256];
-            string message = null;
+            byte[] bytes;
+            string message = "";
             int i = 0, byteCount = 0;
             do
             {
+                bytes = new Byte[1024];
                 i = stream.Read(bytes, 0, bytes.Length);
                 // Translate data bytes to a ASCII string.
-                message = Encoding.Unicode.GetString(bytes, byteCount, i);
+                //message = Encoding.Unicode.GetString(bytes, byteCount, i);
+                string newmessage = Encoding.Unicode.GetString(bytes, 0, i);
+                message = message + newmessage;
                 byteCount += i;
+                Console.WriteLine(newmessage);
             } while (stream.DataAvailable);
+
+            
 
             return message;
         }
