@@ -51,6 +51,7 @@ namespace server.Controller
             //string constr = src + ";AttachDbFilename=" + path + ";Integrated Security=True";
 
             string path = Program.Databaseconfigpath;
+            //Console.WriteLine(path);
             userID = "";
             password = "";
             datasource = "";
@@ -59,7 +60,7 @@ namespace server.Controller
 
             try
             {
-                using (StreamReader sr = new StreamReader(Program.Portconfigpath))
+                using (StreamReader sr = new StreamReader(Program.Databaseconfigpath))
                 {
                     string line;
                     // Read and display lines from the file until the end of
