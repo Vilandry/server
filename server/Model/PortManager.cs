@@ -199,7 +199,7 @@ namespace server.Model
 
                     if (miscport == -1 && takenPorts.Contains(9899))
                     {
-                        Console.WriteLine("Portmanager error! No loginport given and its default value is assigned! Exiting...");
+                        Console.WriteLine("Portmanager error! No miscport given and its default value is assigned! Exiting...");
                         Environment.Exit(0);
                         Console.ReadKey();
                     }
@@ -212,6 +212,19 @@ namespace server.Model
                     if (privateChatPorts.Count == 0)
                     {
                         Console.WriteLine("Portmanager notice: No privateChatPorts given, using its default value of range 11001-19999.");
+                        for (int i = 11001; i < 19999; i++)
+                        {
+                            privateChatPorts.Enqueue(i);
+                        }
+                    }
+
+                    if (groupChatPorts.Count == 0)
+                    {
+                        Console.WriteLine("Portmanager notice: No privateChatPorts given, using its default value of range 21001-29999.");
+                        for (int i = 21001; i < 29999; i++)
+                    {
+                        groupChatPorts.Enqueue(i);
+                    }
                     }
                 }
                 else

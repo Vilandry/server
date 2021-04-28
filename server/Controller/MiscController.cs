@@ -71,7 +71,7 @@ namespace server.Controller
                     }
                     catch(Exception e)
                     {
-                        Console.WriteLine("MiscController error: could not reach client, error message" + e.Message);
+                        Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
                         return;
                     }
                     
