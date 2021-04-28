@@ -23,10 +23,10 @@ namespace server.Model
 
         public static PortManager instance()
         {
-            if(manager==null)
+            if (manager == null)
             {
                 manager = new PortManager();
-                
+
             }
 
             return manager;
@@ -41,9 +41,9 @@ namespace server.Model
             {
 
                 // Open the text file using a stream reader.
-                if(Program.Portconfigpath != "")
+                if (Program.Portconfigpath != "")
                 {
-                    Console.WriteLine("Given config file: " + Program.Portconfigpath);
+                    Console.WriteLine("Portmanager: Given config file: " + Program.Portconfigpath);
                     using (StreamReader sr = new StreamReader(Program.Portconfigpath))
                     {
                         matchport = -1;
@@ -56,7 +56,7 @@ namespace server.Model
                         // the file is reached.
                         while ((line = sr.ReadLine()) != null)
                         {
-                            Console.WriteLine("From config file: " + line);
+                            Console.WriteLine("Portmanager: From config file: " + line);
 
                             string arg = line.Split("=")[0];
                             string[] portrange = line.Split("=")[1].Split("-");
@@ -173,7 +173,7 @@ namespace server.Model
                         }
                     }
 
-                    if(matchport == -1 && takenPorts.Contains(9900))
+                    if (matchport == -1 && takenPorts.Contains(9900))
                     {
                         Console.WriteLine("Portmanager error! No matchport given and its default value is assigned! Exiting...");
                         Environment.Exit(0);
@@ -208,8 +208,8 @@ namespace server.Model
                         miscport = 9899;
                         Console.WriteLine("Portmanager notice: No miscport given, using its default value of 9899.");
                     }
-                    
-                    if(privateChatPorts.Count == 0)
+
+                    if (privateChatPorts.Count == 0)
                     {
                         Console.WriteLine("Portmanager notice: No privateChatPorts given, using its default value of range 11001-19999.");
                     }
@@ -232,7 +232,7 @@ namespace server.Model
                     loginport = 11000;
                     miscport = 9899;
 
-                    Console.WriteLine("PortManager: default ports, as:\nmatchport: 9900\nloginport: 11000\nmiscport: 9899\ninfoport: 9000\nprivateChatPorts: 11001-19999\ngroupChatPorts: 21001-29999");
+                    Console.WriteLine("PortManager: default ports, as:\n\tmatchport: 9900\n\tloginport: 11000\n\tmiscport: 9899\n\tinfoport: 9000\n\tprivateChatPorts: 11001-19999\n\tgroupChatPorts: 21001-29999");
                 }
             }
             catch (IOException e)
@@ -253,7 +253,7 @@ namespace server.Model
                 loginport = 11000;
                 miscport = 9899;
 
-                Console.WriteLine("PortManager: using default ports, as:\nmatchport: 9900\nloginport: 11000\nmiscport: 9899\ninfoport: 9000\nprivateChatPorts: 11001-19999\ngroupChatPorts: 21001-29999");
+                Console.WriteLine("PortManager: using default ports, as:\n\tmatchport: 9900\n\tloginport: 11000\n\tmiscport: 9899\n\tinfoport: 9000\n\tprivateChatPorts: 11001-19999\n\tgroupChatPorts: 21001-29999");
             }
         }
 
@@ -262,11 +262,11 @@ namespace server.Model
             int port;
             if (privateChatPorts.TryDequeue(out port))
             {
-                return port;                
+                return port;
             }
             else
             {
-                return -1; 
+                return -1;
             }
         }
 
@@ -285,7 +285,7 @@ namespace server.Model
 
         public void ReturnPrivateChatPort(int port)
         {
-            lock(llock)
+            lock (llock)
             {
                 privateChatPorts.Enqueue(port);
             }
@@ -310,14 +310,14 @@ namespace server.Model
             try
             {
                 int portCandidate = int.Parse(portvalue);
-                if(port >=-1)
+                if (port >= -1)
                 {
                     Console.WriteLine("PortManager error: port cannot be lower than -1! Exiting...");
                     success = false;
                 }
                 else
                 {
-                    if(takenPorts.Contains(portCandidate))
+                    if (takenPorts.Contains(portCandidate))
                     {
                         Console.WriteLine("PortManager error: conflict during ports on port " + portCandidate + "! Exiting...");
                         success = false;
@@ -329,7 +329,7 @@ namespace server.Model
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("PortManager error: Cannot parse given portvalue! Error message: " + e.Message + "Exiting...");
                 success = false;
@@ -345,20 +345,20 @@ namespace server.Model
                 int lowerbound = int.Parse(lower);
                 int upperbound = int.Parse(upper);
 
-                if(lowerbound>upperbound)
+                if (lowerbound > upperbound)
                 {
                     Console.WriteLine("PortManager error: Lowerbound is higher than upperboiund! Exiting...");
                     success = false;
                     //Environment.Exit(0);
                 }
 
-                if(upperbound - lowerbound < 100)
+                if (upperbound - lowerbound < 100)
                 {
                     Console.WriteLine("PortManager warning: assigned less than 100 ports for a chattype!");
                 }
-                for(int portCandidate = lowerbound; portCandidate < upperbound+1 && success; portCandidate++)
+                for (int portCandidate = lowerbound; portCandidate < upperbound + 1 && success; portCandidate++)
                 {
-                    if(takenPorts.Contains(portCandidate))
+                    if (takenPorts.Contains(portCandidate))
                     {
                         success = false;
                         Console.WriteLine("PortManager error: conflict during ports on port " + portCandidate + "! Exiting...");
@@ -370,7 +370,7 @@ namespace server.Model
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("PortManager error: error during parsing portrange boudns. Error message: " + e.Message + "Exiting...");
                 success = false;
