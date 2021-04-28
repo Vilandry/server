@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
 using System.Globalization;
-using System.IO;
 using Microsoft.Extensions.Configuration;
 using server.Model;
-
 
 
 namespace server.Controller
@@ -19,12 +17,6 @@ namespace server.Controller
         private SqlConnection connection;
 
         static DatabaseController inst;
-
-        private string userID;
-        private string password;
-        private string datasource;
-        private string initialCatalog;
-
 
         private static readonly object llock = new object();
 
@@ -49,131 +41,23 @@ namespace server.Controller
             //string path = "/home/adam0801k/server/server/Database/KnocKnock.mdf";
 
             //string constr = src + ";AttachDbFilename=" + path + ";Integrated Security=True";
-
-            string path = Program.Databaseconfigpath;
-            userID = "";
-            password = "";
-            datasource = "";
-            initialCatalog = "";
-
-
-            try
-            {
-                using (StreamReader sr = new StreamReader(Program.Portconfigpath))
-                {
-                    string line;
-                    // Read and display lines from the file until the end of
-                    // the file is reached.
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        Console.WriteLine("DatabaseController: From config file: " + line);
-
-                        string datamember = line.Split("=")[0];
-                        string value = line.Split("=")[1];
-
-                        switch(datamember)
-                        {
-                            case "UserID": 
-                                if(userID != "")
-                                {
-                                    Console.WriteLine("DatabaseController error: UserId already given with value of " + userID + "! Exiting...");
-                                    Environment.Exit(0);
-                                }
-                                else
-                                {
-                                    userID = value;
-                                }
-                                break;
-
-                            case "Password":
-                                if (password != "")
-                                {
-                                    Console.WriteLine("DatabaseController error: Password already given with value of " + password + "! Exiting...");
-                                    Environment.Exit(0);
-                                }
-                                else
-                                {
-                                    password = value;
-                                }
-                                break;
-
-                            case "DataSource":
-                                if (datasource != "")
-                                {
-                                    Console.WriteLine("DatabaseController error: DataSource already given with value of " + datasource + "! Exiting...");
-                                    Environment.Exit(0);
-                                }
-                                else
-                                {
-                                    datasource = value;
-                                }
-                                break;
-
-                            case "InitialCatalog":
-                                if (initialCatalog != "")
-                                {
-                                    Console.WriteLine("DatabaseController error: InitialCatalog already given with value of " + initialCatalog + "! Exiting...");
-                                    Environment.Exit(0);
-                                }
-                                else
-                                {
-                                    initialCatalog = value;
-                                }
-                                break;
-                        }
-
-
-                    }
-                
-                    if(userID == "")
-                    {
-                        Console.WriteLine("DatabaseController error: No data provided for UserID. Exiting..." );
-                        Environment.Exit(0);
-                    }
-                    if(password == "")
-                    {
-                        Console.WriteLine("DatabaseController error: No data provided for Password. Exiting...");
-                        Environment.Exit(0);
-                    }
-                    if(datasource == "")
-                    {
-                        Console.WriteLine("DatabaseController error: No data provided for DataSource. Exiting...");
-                        Environment.Exit(0);
-                    }
-                    if(initialCatalog == "")
-                    {
-                        Console.WriteLine("DatabaseController error: No data provided for InitialCatalog. Exiting...");
-                        Environment.Exit(0);
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("DatabaseController error: cannot open config file, error message: " + e.Message + "\nExiting...");
-                Environment.Exit(0);
-            }
-
+            
+            
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
-            builder.DataSource = datasource;
-            builder.UserID = userID;
-            builder.Password = password;
-            builder.InitialCatalog = initialCatalog;
+                builder.DataSource = "localhost";   // update me
+                builder.UserID = "sa";              // update me
+                builder.Password = "Sz@kd0li";      // update me
+                builder.InitialCatalog = "KnocKnock";
 
-            try
-            {
-                Console.WriteLine("DatabaseController: Connecting to SQL Server... ");
+                // Connect to SQL
+                Console.Write("DatabaseController: Connecting to SQL Server ... ");
                 connection = new SqlConnection(builder.ConnectionString);
 
                 connection.Open();
                 Console.WriteLine("DatabaseController: Connected to database.");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("DatabaseController error: cannot connect to database, error message: " + e.Message + "\nExiting... ");
-                Environment.Exit(0);
-            }
-
+                
+            
+            
 
             //string constr = "Data Source=KnocKnock.mdf;AttachDbFilename=/home/adam0801k/server/server/Database/KnocKnock.mdf;Persist Security Info=False";
             //connection = new SqlConnection(constr);
