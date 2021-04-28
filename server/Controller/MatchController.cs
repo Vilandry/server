@@ -189,7 +189,11 @@ namespace server.Controller
                                            ///send the next amount of data: the verifying
                                            ///start with the client
 
-                        string conversationid = "OK|" + curUser.Username + "|" + DateTime.Now + "|" + candidate.Username;
+
+                        TimeSpan curtime = DateTime.UtcNow - new DateTime(1970, 1, 1);
+                        int secondsSinceEpoch = (int)curtime.TotalSeconds;
+
+                        string conversationid = "OK|" + curUser.Username + "|" + secondsSinceEpoch + "|" + candidate.Username;
                         Console.WriteLine("MatchController: okmessage: " + conversationid);
                         byte[] okmsg = Encoding.Unicode.GetBytes(conversationid);
                         try
