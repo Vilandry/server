@@ -43,7 +43,7 @@ namespace server.Model
                 // Open the text file using a stream reader.
                 if(Program.Portconfigpath != "")
                 {
-                    Console.WriteLine("Given config file: " + Program.Portconfigpath);
+                    Console.WriteLine("Portmanager: Given config file: " + Program.Portconfigpath);
                     using (StreamReader sr = new StreamReader(Program.Portconfigpath))
                     {
                         matchport = -1;
@@ -56,7 +56,7 @@ namespace server.Model
                         // the file is reached.
                         while ((line = sr.ReadLine()) != null)
                         {
-                            Console.WriteLine("From config file: " + line);
+                            Console.WriteLine("Portmanager: From config file: " + line);
 
                             string arg = line.Split("=")[0];
                             string[] portrange = line.Split("=")[1].Split("-");
@@ -232,7 +232,7 @@ namespace server.Model
                     loginport = 11000;
                     miscport = 9899;
 
-                    Console.WriteLine("PortManager: default ports, as:\nmatchport: 9900\nloginport: 11000\nmiscport: 9899\ninfoport: 9000\nprivateChatPorts: 11001-19999\ngroupChatPorts: 21001-29999");
+                    Console.WriteLine("PortManager: default ports, as:\n\tmatchport: 9900\n\tloginport: 11000\n\tmiscport: 9899\n\tinfoport: 9000\n\tprivateChatPorts: 11001-19999\n\tgroupChatPorts: 21001-29999");
                 }
             }
             catch (IOException e)
@@ -253,7 +253,7 @@ namespace server.Model
                 loginport = 11000;
                 miscport = 9899;
 
-                Console.WriteLine("PortManager: using default ports, as:\nmatchport: 9900\nloginport: 11000\nmiscport: 9899\ninfoport: 9000\nprivateChatPorts: 11001-19999\ngroupChatPorts: 21001-29999");
+                Console.WriteLine("PortManager: using default ports, as:\n\tmatchport: 9900\n\tloginport: 11000\n\tmiscport: 9899\n\tinfoport: 9000\n\tprivateChatPorts: 11001-19999\n\tgroupChatPorts: 21001-29999");
             }
         }
 
