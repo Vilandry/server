@@ -148,7 +148,7 @@ namespace server.Controller
             foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
             {
 
-                string disconnect_msg = "SERVER|!LEAVE";
+                string disconnect_msg = "SERVER|!LEFT";
                 byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
 
                 try

@@ -35,14 +35,32 @@ namespace server.Controller
         {
             //string configpath = @"..\config\database.conf";
 
-            string src = "Data Source=(LocalDB)\\MSSQLLocalDB";
-            string path = "C:\\Users\\Kiss Ádám\\Desktop\\Szakdolgozat\\server\\server\\Database\\KnocKnock.mdf";
-            //string path = "/home/adam0801k";
+            //string src = "Data Source=MSSQLLocalDB";
+            //string src = "localhost\\MSSQLLocalDB";
+            //string path = "C:\\Users\\Kiss Ádám\\Desktop\\Szakdolgozat\\server\\server\\Database\\KnocKnock.mdf";
+            //string path = "/home/adam0801k/server/server/Database/KnocKnock.mdf";
 
-            string constr = src + ";AttachDbFilename=" + path + ";Integrated Security=True";
+            //string constr = src + ";AttachDbFilename=" + path + ";Integrated Security=True";
+            
+            
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+                builder.DataSource = "localhost";   // update me
+                builder.UserID = "sa";              // update me
+                builder.Password = "Sz@kd0li";      // update me
+                builder.InitialCatalog = "KnocKnock";
 
+                // Connect to SQL
+                Console.Write("DatabaseController: Connecting to SQL Server ... ");
+                connection = new SqlConnection(builder.ConnectionString);
 
-            connection = new SqlConnection(constr);
+                connection.Open();
+                Console.WriteLine("DatabaseController: Connected to database.");
+                
+            
+            
+
+            //string constr = "Data Source=KnocKnock.mdf;AttachDbFilename=/home/adam0801k/server/server/Database/KnocKnock.mdf;Persist Security Info=False";
+            //connection = new SqlConnection(constr);
         }
 
         /*public MatchUser loadSUser(string username, string password)
@@ -115,9 +133,11 @@ namespace server.Controller
                     }
                     /*string rowsAffected = command.ExecuteReader().ToString();
                     Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
                     SqlDataReader reader = command.ExecuteReader();
-                    reader.Read();
-                    if (reader != null)
+                    
+                    //Console.WriteLine("Reader: " + reader.ToString());
+                    if (reader.Read())
                     {
                         string res = String.Format("{0}", reader[0]);
                         string pwd = String.Format("{0}", password);
@@ -152,7 +172,7 @@ namespace server.Controller
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Database error: " + ex.Message);
+                    Console.WriteLine("Database error: " + ex.Message + "\nStactrace: " + ex.StackTrace);                    
                     return false;
                 }
             }
@@ -204,7 +224,7 @@ namespace server.Controller
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Message);                    
                     return "";
                 }                
             }
