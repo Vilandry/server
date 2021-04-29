@@ -27,6 +27,7 @@ namespace server.Controller
 
 
         private static readonly object llock = new object();
+        private static readonly object historyllock = new object();
 
         public static DatabaseController instance()
         {
@@ -225,7 +226,7 @@ namespace server.Controller
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Database error: " + ex.Message);
+                Console.WriteLine("Database error in chathistory insertion check: " + ex.Message);
                 return false;
             }
 
@@ -282,14 +283,14 @@ namespace server.Controller
                     else
                     {
                         reader.Close();
-                        Console.WriteLine(username + " was not registered!");
+                        Console.WriteLine("DatabaseController: " + username + " was not registered, so cannot log in!");
                         return false;
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Database error: " + ex.Message + "\nStactrace: " + ex.StackTrace);
+                    Console.WriteLine("DatabaseController error: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
                     return false;
                 }
             }
@@ -394,10 +395,42 @@ namespace server.Controller
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("DatabaseController error in registration. Error message: " + ex.Message);
                     return false;
                 }
             }
         }
+
+        public void InsertMessageHistoryConnection(string messagehistoryname, string inserter)
+        {
+            lock(historyllock)
+            {
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+                    int curtime = (int)t.TotalSeconds;
+                    string insertText = "INSERT INTO HistoryConnector Values (@hname, @uname)";
+
+                    command = new SqlCommand(insertText, connection);
+                    command.Parameters.AddWithValue("@uname", inserter);
+                    command.Parameters.AddWithValue("@hname", messagehistoryname);
+
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error in messagehistory connection insertion. Error message: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public void InsertMessageHistoryText(string messagehistoryname, string text)
+        {}
     }
 }
