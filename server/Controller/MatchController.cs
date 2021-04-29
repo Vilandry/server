@@ -88,7 +88,7 @@ namespace server.Controller
                 }
 
 
-
+                Thread.Sleep(200);
                 handleMatches();
             }
         }
