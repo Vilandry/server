@@ -189,49 +189,7 @@ namespace server.Controller
             return dsUser;
         }*/
 
-        public bool alreadySavedChatHistory(string historyname)
-        {
-            bool alreadySaved = true;
-
-            string commandText = "SELECT COUNT(*) FROM HistoryConnector WHERE ChatName = @historyname_param";
-            SqlCommand command = new SqlCommand(commandText, connection);
-            command.Parameters.AddWithValue("@historyname_param", historyname);
-            try
-            {
-                if (!(connection.State == ConnectionState.Open))
-                {
-                    connection.Open();
-                }
-
-                SqlDataReader reader = command.ExecuteReader();
-                reader.Read();
-                if (reader != null)
-                {
-                    string res = String.Format("{0}", reader[0]);
-                    int numberOfInserted = int.Parse(res);
-                    Console.WriteLine("History was inserted " + numberOfInserted + " times. (res: " + res + ")");
-
-                    /*Console.WriteLine("DBpassword: " + res + "|");
-                    Console.WriteLine("OGpassword: " + password + "|");*/
-                    reader.Close();
-
-                    return (numberOfInserted > 0);
-                }
-                else
-                {
-                    reader.Close();
-                    return false;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Database error in chathistory insertion check: " + ex.Message);
-                return false;
-            }
-
-            return alreadySaved;
-        }
+        
 
         public bool successfulLogin(string username, string password)
         {
@@ -401,7 +359,14 @@ namespace server.Controller
             }
         }
 
-        public void InsertMessageHistoryConnection(string messagehistoryname, string inserter)
+
+
+
+
+
+
+
+        public bool InsertMessageHistoryConnection(string messagehistoryname, string inserter)
         {
             lock(historyllock)
             {
@@ -415,9 +380,10 @@ namespace server.Controller
                     int curtime = (int)t.TotalSeconds;
                     string insertText = "INSERT INTO HistoryConnector Values (@hname, @uname)";
 
-                    command = new SqlCommand(insertText, connection);
-                    command.Parameters.AddWithValue("@uname", inserter);
+                    SqlCommand command = new SqlCommand(insertText, connection);
                     command.Parameters.AddWithValue("@hname", messagehistoryname);
+                    command.Parameters.AddWithValue("@uname", inserter);
+                    
 
                     command.ExecuteNonQuery();
                     return true;
@@ -430,7 +396,47 @@ namespace server.Controller
             }
         }
 
-        public void InsertMessageHistoryText(string messagehistoryname, string text)
-        {}
+        public bool InsertMessageHistoryText(string messagehistoryname, string text)
+        {
+            lock(historyllock)
+            {
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    string insertText = "INSERT INTO MessageHistory Values (@hname, @text)";
+
+                    SqlCommand command = new SqlCommand(insertText, connection);
+                    command.Parameters.AddWithValue("@hname", inserter);
+                    command.Parameters.AddWithValue("@text", text);
+
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error in messagehistory connection insertion. Error message: " + ex.Message);
+                    return false;
+                }
+            }
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 }

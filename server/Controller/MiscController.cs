@@ -10,6 +10,7 @@ using System.Text;
 using System.Collections.Concurrent;
 
 using server.Model;
+using server.Controller;
 
 namespace server.Controller
 {
@@ -60,10 +61,23 @@ namespace server.Controller
             if(commandargs[0] == "CONVSAVE")
             {
                 string savename = commandargs[1];
+                string inserter = commandargs[2];
                 bool wasSaved = DatabaseController.instance().alreadySavedChatHistory(savename);
 
                 if(wasSaved)
                 {
+                    try
+                    {
+                        DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter);
+                        Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename);
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
+                        return;
+                    }
+
+
                     try
                     {
                         byte[] okmsg = Encoding.Unicode.GetBytes("OK");
@@ -87,13 +101,36 @@ namespace server.Controller
                         Thread.Sleep(100);
                         //Console.WriteLine("reading history...");
                         string history = Utility.ReadFromNetworkStream(stream);
-                        Console.WriteLine(history);
-                        okmsg = Encoding.Unicode.GetBytes("OK");
-                        stream.Write(okmsg);
+
+                        
+
+                        if(DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter))
+                        {
+                            if(DatabaseController.instance().InsertMessageHistoryText(savename, history))
+                            {
+                                okmsg = Encoding.Unicode.GetBytes("OK");
+                                stream.Write(okmsg);
+                                Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text!");
+                            }
+                            else
+                            {
+                                okmsg = Encoding.Unicode.GetBytes("ER");
+                                Console.WriteLine("MiscController notice: could not insert history text!");
+                                stream.Write(okmsg);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("MiscController notice: could not insert history connection!");
+                            okmsg = Encoding.Unicode.GetBytes("ER");
+                            stream.Write(okmsg);
+                        }
+                    
+                        
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("MiscController error: could not reach client, error message" + e.Message);
+                        Console.WriteLine("MiscController notice: could not reach client after inserting history text, exception message: " + e.Message);
                         return;
                     }
                 }
