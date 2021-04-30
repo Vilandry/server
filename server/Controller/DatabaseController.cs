@@ -398,7 +398,10 @@ namespace server.Controller
                     command.Parameters.AddWithValue("@hname", messagehistoryname);
                     command.Parameters.AddWithValue("@text", text);
 
-                    command.ExecuteNonQuery();
+                    int res = command.ExecuteNonQuery();
+
+                    Console.WriteLine("TEMP TEMP TEMP: " + res);
+
                     return true;
                 }
                 catch (Exception ex)

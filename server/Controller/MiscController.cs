@@ -69,7 +69,7 @@ namespace server.Controller
                     try
                     {
                         DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter);
-                        Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename);
+                        Console.WriteLine("MiscController: already inserted message history for " + inserter + " as " + savename);
                     }
                     catch(Exception e)
                     {
