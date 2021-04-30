@@ -471,9 +471,9 @@ namespace server.Controller
                     Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
                     //Console.WriteLine("testdatabase");
                     SqlDataReader reader = command.ExecuteReader();
-                    
-                    
-                    while(reader.Read())
+
+                    Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
+                    while (reader.Read())
                     {
                         string res = String.Format("{0}", reader[0]);
                         Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
