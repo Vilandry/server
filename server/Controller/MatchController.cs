@@ -193,7 +193,7 @@ namespace server.Controller
                         TimeSpan curtime = DateTime.UtcNow - new DateTime(1970, 1, 1);
                         int secondsSinceEpoch = (int)curtime.TotalSeconds;
 
-                        string conversationid = "OK|" + curUser.Username + "|" + secondsSinceEpoch + "|" + candidate.Username;
+                        string conversationid = "OK|" + secondsSinceEpoch + "|" + curUser.Username + "|" + candidate.Username;
                         Console.WriteLine("MatchController: okmessage: " + conversationid);
                         byte[] okmsg = Encoding.Unicode.GetBytes(conversationid);
                         try

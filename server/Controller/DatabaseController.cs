@@ -411,36 +411,126 @@ namespace server.Controller
 
         public bool AlreadySavedChatHistory(string historyname)
         {
-            string commandText = "SELECT count(*) FROM MessageHistory WHERE MessageHistoryname = @historyname_param";
-            SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
-
-            command.Parameters.AddWithValue("@historyname_param", historyname);
-
-            try
+            lock (historyllock)
             {
-                if (!(connection.State == ConnectionState.Open))
+                string commandText = "SELECT count(*) FROM MessageHistory WHERE MessageHistoryname = @historyname_param";
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@historyname_param", historyname);
+
+                try
                 {
-                    connection.Open();
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+                    reader.Read();
+
+                    string res = String.Format("{0}", reader[0]);
+                    Console.WriteLine("DatabaseController: " + historyname + " was inserted " + res + "times!");
+
+                    reader.Close();
+
+                    int cnt = int.Parse(res);
+
+                    return cnt > 0;
                 }
-                /*string rowsAffected = command.ExecuteReader().ToString();
-                Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
-                //Console.WriteLine("testdatabase");
-                SqlDataReader reader = command.ExecuteReader();
-                reader.Read();
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: cannot retrieve wether if" + historyname + "was saved, error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                    return false;
+                }
+            }            
+        }
 
-                string res = String.Format("{0}", reader[0]);
-                Console.WriteLine("DatabaseController: " + historyname + " was inserted " + res + "times!");
-
-                reader.Close();
-
-                int cnt = int.Parse(res);
-
-                return cnt > 0;
-            }
-            catch (Exception ex)
+        public string[] GetChatHistoryIDs(string username)
+        {
+            lock (historyllock)
             {
-                Console.WriteLine("DatabaseController error: cannot retrieve wether if" + historyname + "was saved, error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
-                return false;
+                string commandText = "SELECT chatname FROM HistoryConnector WHERE saver = @username_param";
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@username_param", username);
+
+                string[] reslist = new string[0];
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+                    
+                    
+                    while(reader.Read())
+                    {
+                        string res = String.Format("{0}", reader[0]);
+                        Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+
+                        reslist.Append(res);
+                    }
+
+                    
+
+                    reader.Close();
+
+                    return reslist;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                    return new string[0];
+                }
+            }
+        }
+
+        public string GetChatHistoryText(string historyID)
+        {
+            lock (historyllock)
+            {
+                string commandText = "SELECT teext FROM messagehistory WHERE messagehistoryname = @historyname_param";
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@historyname_param", historyID);
+
+                //string[] reslist = new string[0];
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+
+
+                    reader.Read();
+
+                    string res = String.Format("{0}", reader[0]);
+                    Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
+
+
+
+
+                    reader.Close();
+                    return res;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: cannot retrieve the text of" + historyID + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                    return "";
+                }
             }
         }
 

@@ -101,12 +101,9 @@ namespace server.Controller
                         Thread.Sleep(100);
                         //Console.WriteLine("reading history...");
                         string history = Utility.ReadFromNetworkStream(stream);
-
-                        
-
-                        if(DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter))
+                        if (DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter))
                         {
-                            if(DatabaseController.instance().InsertMessageHistoryText(savename, history))
+                            if (DatabaseController.instance().InsertMessageHistoryText(savename, history))
                             {
                                 okmsg = Encoding.Unicode.GetBytes("OK");
                                 stream.Write(okmsg);
@@ -125,8 +122,6 @@ namespace server.Controller
                             okmsg = Encoding.Unicode.GetBytes("ER");
                             stream.Write(okmsg);
                         }
-                    
-                        
                     }
                     catch (Exception e)
                     {
@@ -135,6 +130,42 @@ namespace server.Controller
                     }
                 }
             }
+            else if(commandargs[0] == "CONVLOAD")
+            {
+                try
+                {
+                    string convid = commandargs[1];
+                    string res = DatabaseController.instance().GetChatHistoryText(convid);                
+
+                    byte[] reply = Encoding.Unicode.GetBytes(res);
+
+                    stream.Write(reply);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("MiscController error: could not send convtext message to client! Error message: " + e.Message);
+                }
+            }
+            else if (commandargs[0] == "LISTLOAD")
+            {
+                try
+                {
+                    string username = commandargs[1];
+                    string[] res = DatabaseController.instance().GetChatHistoryIDs(username);
+
+                    string answer = String.Join("!", res);
+
+                    byte[] reply = Encoding.Unicode.GetBytes(answer);
+
+                    stream.Write(reply);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("MiscController error: could not send back convlist message to client! Error message: " + e.Message);
+                }
+                
+            }
+
         }
     }
 }
