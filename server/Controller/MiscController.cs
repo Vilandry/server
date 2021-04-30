@@ -158,6 +158,7 @@ namespace server.Controller
                     answer = answer + "!";
 
                     byte[] reply = Encoding.Unicode.GetBytes(answer);
+                    Console.WriteLine("MiscController: the list: " + answer);
 
                     stream.Write(reply);
                 }
