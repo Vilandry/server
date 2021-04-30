@@ -180,85 +180,7 @@ namespace server.Controller
             //string constr = "Data Source=KnocKnock.mdf;AttachDbFilename=/home/adam0801k/server/server/Database/KnocKnock.mdf;Persist Security Info=False";
             //connection = new SqlConnection(constr);
         }
-
-        /*public MatchUser loadSUser(string username, string password)
-        {
-            MatchUser dsUser = new MatchUser();
-
-
-            return dsUser;
-        }*/
-
-        
-
-        public bool successfulLogin(string username, string password)
-        {
-            lock (llock)
-            {
-                string commandText = "SELECT password FROM Users WHERE username = @username_param";
-
-                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
-
-                command.Parameters.AddWithValue("@username_param", username);
-
-                try
-                {
-                    if (!(connection.State == ConnectionState.Open))
-                    {
-                        connection.Open();
-                    }
-                    /*string rowsAffected = command.ExecuteReader().ToString();
-                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
-                    //Console.WriteLine("testdatabase");
-                    SqlDataReader reader = command.ExecuteReader();
-
-                    //Console.WriteLine("Reader: " + reader.ToString());
-                    if (reader.Read())
-                    {
-                        string res = String.Format("{0}", reader[0]);
-                        string pwd = String.Format("{0}", password);
-
-                        /*Console.WriteLine("DBpassword: " + res + "|");
-                        Console.WriteLine("OGpassword: " + password + "|");
-                        Console.WriteLine("DB hash: " + res.GetHashCode());
-                        Console.WriteLine("OG hash: " + password.GetHashCode());
-                        Console.WriteLine("DB tostring hash: " + res.ToString().GetHashCode());
-                        Console.WriteLine("OG tostring hash: " + password.ToString().GetHashCode());
-                        Console.WriteLine("OG formatted hash: " + pwd.GetHashCode());
-
-                        Console.WriteLine("\n" + (pwd.Length == res.Length));
-                        for (int i=0; i<pwd.Length; i++)
-                        {
-                            Console.Write(pwd[i] == res[i]);
-                        }*/
-
-
-
-                        reader.Close();
-
-                        return (Utility.passwordEquals(res, password));
-                    }
-                    else
-                    {
-                        reader.Close();
-                        Console.WriteLine("DatabaseController: " + username + " was not registered, so cannot log in!");
-                        return false;
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("DatabaseController error: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
-                    return false;
-                }
-            }
-
-        }
-
-        public bool WasntBlockedBy(string blockedby, string blockedCandidate)
-        {
-            return true;
-        }
+      
 
         public string GetAgeAndGender(string username)
         {
@@ -359,9 +281,73 @@ namespace server.Controller
             }
         }
 
+        public bool successfulLogin(string username, string password)
+        {
+            lock (llock)
+            {
+                string commandText = "SELECT password FROM Users WHERE username = @username_param";
+
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@username_param", username);
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    //Console.WriteLine("Reader: " + reader.ToString());
+                    if (reader.Read())
+                    {
+                        string res = String.Format("{0}", reader[0]);
+                        string pwd = String.Format("{0}", password);
+
+                        /*Console.WriteLine("DBpassword: " + res + "|");
+                        Console.WriteLine("OGpassword: " + password + "|");
+                        Console.WriteLine("DB hash: " + res.GetHashCode());
+                        Console.WriteLine("OG hash: " + password.GetHashCode());
+
+                        Console.WriteLine("\n" + (pwd.Length == res.Length));
+                        for (int i=0; i<pwd.Length; i++)
+                        {
+                            Console.Write(pwd[i] == res[i]);
+                        }*/
 
 
 
+                        reader.Close();
+
+                        return (res == password);
+                    }
+                    else
+                    {
+                        reader.Close();
+                        Console.WriteLine("DatabaseController: " + username + " was not registered, so cannot log in!");
+                        return false;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                    return false;
+                }
+            }
+
+        }
+
+
+
+        public bool WasntBlockedBy(string blockedby, string blockedCandidate)
+        {
+            return true;
+        }
 
 
 
@@ -409,7 +395,7 @@ namespace server.Controller
                     string insertText = "INSERT INTO MessageHistory Values (@hname, @text)";
 
                     SqlCommand command = new SqlCommand(insertText, connection);
-                    command.Parameters.AddWithValue("@hname", inserter);
+                    command.Parameters.AddWithValue("@hname", messagehistoryname);
                     command.Parameters.AddWithValue("@text", text);
 
                     command.ExecuteNonQuery();
@@ -422,21 +408,43 @@ namespace server.Controller
                 }
             }
         }
+
+        public bool AlreadySavedChatHistory(string historyname)
+        {
+            string commandText = "SELECT count(*) FROM MessageHistory WHERE MessageHistoryname = @historyname_param";
+            SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+            command.Parameters.AddWithValue("@historyname_param", historyname);
+
+            try
+            {
+                if (!(connection.State == ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                /*string rowsAffected = command.ExecuteReader().ToString();
+                Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                //Console.WriteLine("testdatabase");
+                SqlDataReader reader = command.ExecuteReader();
+                reader.Read();
+
+                string res = String.Format("{0}", reader[0]);
+                Console.WriteLine("DatabaseController: " + historyname + " was inserted " + res + "times!");
+
+                reader.Close();
+
+                int cnt = int.Parse(res);
+
+                return cnt > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DatabaseController error: cannot retrieve wether if" + historyname + "was saved, error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                return false;
+            }
+        }
+
+    
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
 }
