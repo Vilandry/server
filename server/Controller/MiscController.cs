@@ -151,9 +151,11 @@ namespace server.Controller
                 try
                 {
                     string username = commandargs[1];
+                    Console.WriteLine("MiscController: trying to get the list of " + username);
                     string[] res = DatabaseController.instance().GetChatHistoryIDs(username);
 
                     string answer = String.Join("!", res);
+                    answer = answer + "!";
 
                     byte[] reply = Encoding.Unicode.GetBytes(answer);
 
