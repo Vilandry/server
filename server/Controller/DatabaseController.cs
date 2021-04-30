@@ -450,7 +450,7 @@ namespace server.Controller
             }            
         }
 
-        public string[] GetChatHistoryIDs(string username)
+        public string GetChatHistoryIDs(string username)
         {
             lock (historyllock)
             {
@@ -459,7 +459,7 @@ namespace server.Controller
 
                 command.Parameters.AddWithValue("@username_param", username);
 
-                string[] reslist = new string[0];
+                string reslist = "";
 
                 try
                 {
@@ -478,14 +478,10 @@ namespace server.Controller
                         string res = String.Format("{0}", reader[0]);
                         Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
 
-                        reslist.Append(res);
+                        reslist = reslist + "!" + res;
                     }
 
-                    Console.Write("THE LIST: ");
-                    foreach (string thingy in reslist)
-                    {
-                        Console.Write(thingy + ", ");
-                    }
+                    Console.Write("THE LIST: " + reslist);
 
                     reader.Close();
 

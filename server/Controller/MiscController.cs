@@ -152,17 +152,17 @@ namespace server.Controller
                 {
                     string username = commandargs[1];
                     Console.WriteLine("MiscController: trying to get the list of " + username);
-                    string[] res = DatabaseController.instance().GetChatHistoryIDs(username);
+                    string res = DatabaseController.instance().GetChatHistoryIDs(username);
 
-                    foreach(string thingy in res)
+                    /*foreach(string thingy in res)
                     {
                         Console.Write(thingy + "   ");
                     }
 
                     string answer = String.Join("!", res);
-                    answer = answer + "!";
+                    answer = answer + "!";*/
 
-                    byte[] reply = Encoding.Unicode.GetBytes(answer);
+                    byte[] reply = Encoding.Unicode.GetBytes(res);
                     Console.WriteLine("MiscController: the list: " + answer);
 
                     stream.Write(reply);
