@@ -477,8 +477,9 @@ namespace server.Controller
                     {
                         string res = String.Format("{0}", reader[0]);
                         Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
-
-                        reslist = reslist + "!" + res;
+                        if(reslist == "") { reslist = res; }
+                        else { reslist = reslist + "!" + res; }
+                        
                     }
 
                     Console.Write("THE LIST: " + reslist);
