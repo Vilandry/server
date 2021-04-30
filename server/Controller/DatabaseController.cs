@@ -481,7 +481,10 @@ namespace server.Controller
                         reslist.Append(res);
                     }
 
-                    
+                    foreach(string thingy in reslist)
+                    {
+                        Console.Write(thingy + ", ");
+                    }
 
                     reader.Close();
 
