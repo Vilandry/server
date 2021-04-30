@@ -154,6 +154,11 @@ namespace server.Controller
                     Console.WriteLine("MiscController: trying to get the list of " + username);
                     string[] res = DatabaseController.instance().GetChatHistoryIDs(username);
 
+                    foreach(string thingy in res)
+                    {
+                        Console.Write(thingy + "   ");
+                    }
+
                     string answer = String.Join("!", res);
                     answer = answer + "!";
 
