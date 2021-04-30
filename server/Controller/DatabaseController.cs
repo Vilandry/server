@@ -490,7 +490,7 @@ namespace server.Controller
                 catch (Exception ex)
                 {
                     Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
-                    return new string[0];
+                    return reslist;
                 }
             }
         }
