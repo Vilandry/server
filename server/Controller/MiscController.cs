@@ -60,8 +60,8 @@ namespace server.Controller
 
             if(commandargs[0] == "CONVSAVE")
             {
-                string savename = commandargs[1];
-                string inserter = commandargs[2];
+                string savename = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3]; ;
+                string inserter = commandargs[4];
                 bool wasSaved = DatabaseController.instance().AlreadySavedChatHistory(savename);
 
                 if(wasSaved)
@@ -107,12 +107,12 @@ namespace server.Controller
                             {
                                 okmsg = Encoding.Unicode.GetBytes("OK");
                                 stream.Write(okmsg);
-                                Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text!");
+                                Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text\n" + history);
                             }
                             else
                             {
                                 okmsg = Encoding.Unicode.GetBytes("ER");
-                                Console.WriteLine("MiscController notice: could not insert history text!");
+                                Console.WriteLine("MiscController notice: could not insert history text! Consider deleting manually the connections!");
                                 stream.Write(okmsg);
                             }
                         }
