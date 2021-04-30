@@ -62,7 +62,7 @@ namespace server.Controller
             {
                 string savename = commandargs[1];
                 string inserter = commandargs[2];
-                bool wasSaved = DatabaseController.instance().alreadySavedChatHistory(savename);
+                bool wasSaved = DatabaseController.instance().AlreadySavedChatHistory(savename);
 
                 if(wasSaved)
                 {
