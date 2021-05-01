@@ -82,6 +82,7 @@ namespace server.Controller
                         NetworkStream ns = client.GetStream();
                         if (ns.DataAvailable)
                         {
+                            Console.WriteLine("Dataavailable on portnum " + portnum);
                             NetworkStream stream = client.GetStream();
 
 
@@ -138,6 +139,7 @@ namespace server.Controller
 
                 Thread.Sleep(1000);
                 Console.WriteLine("Privatechat on port " + portnum + "is alive! Number of participants: " + clients.Count);
+                Thread.Yield();
             }
         }
 
