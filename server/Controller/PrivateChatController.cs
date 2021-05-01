@@ -80,12 +80,11 @@ namespace server.Controller
                         int parentId = id_client.Key;
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
-                        Console.WriteLine("Trying to get data on port " + portnum);
                         Console.WriteLine("Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
 
-                        if (ns.DataAvailable)
+                        //if (ns.DataAvailable)
                         {
-                            Console.WriteLine("Dataavailable on portnum " + portnum);
+                            //Console.WriteLine("Dataavailable on portnum " + portnum);
 
                             string message = Utility.ReadFromNetworkStream(ns);
                             Console.WriteLine(message);
@@ -202,21 +201,29 @@ namespace server.Controller
             Console.WriteLine("HandleCommand: " + command + " on portnum " + portnum);
             if(commandargs[0] == "!LEAVE")
             {
-                foreach(KeyValuePair<int, TcpClient> id_destination in clients)
+                Console.WriteLine("PrivateChatController: ending chat on port " + portnum);
+                foreach (KeyValuePair<int, TcpClient> id_destination in clients)
                 {
-                    TcpClient destination = id_destination.Value;
-                    NetworkStream stream = destination.GetStream();
-                    string disconnect_msg = "SERVER|" + "!LEFT|" + commandargs[1];
-                    byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
-                    stream.Write(disconnect_data, 0, disconnect_data.Length);
+                    try
+                    {
+                        TcpClient destination = id_destination.Value;
+                        NetworkStream stream = destination.GetStream();
+                        string disconnect_msg = "SERVER|" + "!LEFT|" + commandargs[1];
+                        byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
+                        stream.Write(disconnect_data, 0, disconnect_data.Length);
+                        Console.WriteLine("PrivateChatController: disconnect message sent to a recipient on port " + portnum);
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine("PrivateChatController notice: while shutting down the chat, we found a broken pipe.");
+                    }
                     
-                    Console.WriteLine("UPortManager: ending chat on port " + portnum);
                 }
                 ongoing = false;
             }
             else
             {
-                Console.WriteLine("Unknown command arrived on portnum " + portnum);
+                Console.WriteLine("PrivateChatController: Unknown command arrived on portnum " + portnum + " command: " + commandargs[0]);
             }
         }
     }
