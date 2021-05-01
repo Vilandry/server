@@ -139,8 +139,8 @@ namespace server.Controller
                 }
 
                 Thread.Sleep(5000);
-                //Console.WriteLine("Privatechat on port " + portnum + "is alive! Number of participants: " + clients.Count);
-                Thread.Yield();
+                Console.WriteLine("Privatechat on port " + portnum + "is alive! Number of participants: " + clients.Count);
+                //Thread.Yield();
             }
         }
 
