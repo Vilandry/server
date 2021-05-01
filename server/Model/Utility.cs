@@ -37,7 +37,7 @@ namespace server.Model
             byte[] bytes;
             string message = "";
             int i = 0, byteCount = 0;
-            while (stream.DataAvailable)
+            do
             {
                 bytes = new Byte[1024];
                 i = stream.Read(bytes, 0, bytes.Length);
@@ -47,11 +47,11 @@ namespace server.Model
                 message = message + newmessage;
                 byteCount += i;
                 Console.WriteLine(newmessage);
-            }
+            } while (stream.DataAvailable)
 
-            
 
-            return message;
+
+                return message;
         }
     }
 }
