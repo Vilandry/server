@@ -47,7 +47,7 @@ namespace server.Model
                 message = message + newmessage;
                 byteCount += i;
                 Console.WriteLine(newmessage);
-            } while (stream.DataAvailable)
+            } while (stream.DataAvailable);
 
 
 
