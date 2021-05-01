@@ -459,7 +459,7 @@ namespace server.Controller
 
                 command.Parameters.AddWithValue("@username_param", username);
 
-                string reslist = "";
+                string reslist = "ER";
 
                 try
                 {
@@ -477,7 +477,7 @@ namespace server.Controller
                     {
                         string res = String.Format("{0}", reader[0]);
                         Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
-                        if(reslist == "") { reslist = res; }
+                        if(reslist == "ER") { reslist = res; }
                         else { reslist = reslist + "!" + res; }
                         
                     }
@@ -491,7 +491,7 @@ namespace server.Controller
                 catch (Exception ex)
                 {
                     Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
-                    return reslist;
+                    return "ER";
                 }
             }
         }
@@ -504,7 +504,6 @@ namespace server.Controller
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
                 command.Parameters.AddWithValue("@historyname_param", historyID);
-
                 //string[] reslist = new string[0];
 
                 try
@@ -518,13 +517,16 @@ namespace server.Controller
                     //Console.WriteLine("testdatabase");
                     SqlDataReader reader = command.ExecuteReader();
 
-
-                    reader.Read();
-
-                    string res = String.Format("{0}", reader[0]);
-                    Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
-
-
+                    string res = "ER";
+                    if (reader.Read())
+                    {
+                        res = String.Format("{0}", reader[0]);
+                        Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("DatabaseController error: there is no text for" + historyID + ", sending ER!");
+                    }
 
 
                     reader.Close();
