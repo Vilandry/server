@@ -137,6 +137,7 @@ namespace server.Controller
                 }
 
                 Thread.Sleep(100);
+                Console.WriteLine("Privatechat on port " + portnum + "is alive!");
             }
         }
 
@@ -148,7 +149,7 @@ namespace server.Controller
             foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
             {
 
-                string disconnect_msg = "SERVER|!LEFT";
+                string disconnect_msg = "SERVER|!LEFT|Your partner";
                 byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
 
                 try
@@ -162,6 +163,11 @@ namespace server.Controller
                     RemoveDeadClient(id_lastOne.Key, id_lastOne.Value);
                 }
 
+            }
+
+            if(type == CHATTPYE.PRIVATE)
+            {
+                ongoing = false;
             }
         }
 
@@ -178,8 +184,10 @@ namespace server.Controller
                     string disconnect_msg = "SERVER|" + "!LEFT|" + commandargs[1];
                     byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
                     stream.Write(disconnect_data, 0, disconnect_data.Length);
-                    ongoing = false;
+                    
+                    Console.WriteLine("UPortManager: ending chat on port " + portnum);
                 }
+                ongoing = false;
             }
             else
             {
