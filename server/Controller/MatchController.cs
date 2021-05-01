@@ -118,8 +118,9 @@ namespace server.Controller
                         if (port == -1)
                         {
                             Console.WriteLine("MatchController: No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
-                            Thread.Sleep(1000);
-                            continue;
+                            Thread.Sleep(10000);
+                            handleMatches();
+                            return;
                         }
 
                         string portString = "" + port;

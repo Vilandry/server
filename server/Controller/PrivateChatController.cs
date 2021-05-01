@@ -80,6 +80,7 @@ namespace server.Controller
                         int parentId = id_client.Key;
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
+                        Console.WriteLine("Trying to get data on port " + portnum);
                         if (ns.DataAvailable)
                         {
                             Console.WriteLine("Dataavailable on portnum " + portnum);
@@ -137,7 +138,7 @@ namespace server.Controller
                     }
                 }
 
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
                 //Console.WriteLine("Privatechat on port " + portnum + "is alive! Number of participants: " + clients.Count);
                 Thread.Yield();
             }
