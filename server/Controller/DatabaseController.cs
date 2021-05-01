@@ -482,7 +482,7 @@ namespace server.Controller
                         
                     }
 
-                    Console.Write("THE LIST: " + reslist);
+                    Console.Write("THE LIST: " + reslist + "\n");
 
                     reader.Close();
 

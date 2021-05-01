@@ -134,7 +134,7 @@ namespace server.Controller
             {
                 try
                 {
-                    string convid = commandargs[1];
+                    string convid = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3];
                     string res = DatabaseController.instance().GetChatHistoryText(convid);                
 
                     byte[] reply = Encoding.Unicode.GetBytes(res);
