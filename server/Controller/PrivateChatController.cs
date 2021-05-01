@@ -81,13 +81,13 @@ namespace server.Controller
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
                         Console.WriteLine("Trying to get data on port " + portnum);
+                        Console.WriteLine("Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
+
                         if (ns.DataAvailable)
                         {
                             Console.WriteLine("Dataavailable on portnum " + portnum);
-                            NetworkStream stream = client.GetStream();
 
-
-                            string message = Utility.ReadFromNetworkStream(stream);
+                            string message = Utility.ReadFromNetworkStream(ns);
                             Console.WriteLine(message);
                             //conversationHistory.Add(Utility.EscapePrivateChat(message));
 
