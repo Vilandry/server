@@ -224,7 +224,7 @@ namespace server.Controller
 
                         PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
                         Thread privateChatThread = new Thread(pcc.handleConnecting);
-
+                        privateChatThread.IsBackground = true;
                         privateChatThread.Start();
 
                         lock (llock)
