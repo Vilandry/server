@@ -500,7 +500,7 @@ namespace server.Controller
         {
             lock (historyllock)
             {
-                string commandText = "SELECT teext FROM messagehistory WHERE messagehistoryname = @historyname_param";
+                string commandText = "SELECT text FROM messagehistory WHERE messagehistoryname = @historyname_param";
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
                 command.Parameters.AddWithValue("@historyname_param", historyID);
