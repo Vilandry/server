@@ -20,7 +20,7 @@ namespace server.Controller
         private Dictionary<MatchUser, bool> cantMatch;
         private TcpListener server;
         private static MatchController inst;
-
+        private List<Thread> privatechatsThreads;
 
         public static MatchController instance()
         {
@@ -44,11 +44,15 @@ namespace server.Controller
         {
             server = new TcpListener(IPAddress.Any, PortManager.instance().Matchport);
             clients = new List<MatchUser>();
+            privatechatsThreads = new List<Thread>();
 
             server.Start();
 
             Thread commandThread = new Thread(handleInputCommands);
             commandThread.Start();
+
+            Thread managerThread = new Thread(ThreadManaging);
+            managerThread.Start();
 
             while (true)
             {
@@ -228,6 +232,9 @@ namespace server.Controller
                         privateChatThread.IsBackground = true;
                         privateChatThread.Start();
 
+                        privatechatsThreads.Add(privateChatThread);
+                        
+
                         lock (llock)
                         {
 
@@ -387,6 +394,31 @@ namespace server.Controller
             else
             {
                 Console.WriteLine("MatchController: unknown command " + command);
+            }
+        }
+
+        private void ThreadManaging()
+        {
+            while(true)
+            {
+                List<Thread> aliveThreads = new List<Thread>();
+                lock(llock)
+                {
+                    foreach(Thread t in privatechatsThreads)
+                    {
+                        if(t.IsAlive)
+                        {
+                            aliveThreads.Add(t);
+                        }
+                        else
+                        {
+                            Console.WriteLine("MatchController: removing dead chatthread.");
+                        }
+                    }
+                    privatechatsThreads = aliveThreads;
+                    Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
+                }
+                Thread.Sleep(10000);
             }
         }
 

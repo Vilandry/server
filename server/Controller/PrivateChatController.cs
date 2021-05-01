@@ -140,6 +140,28 @@ namespace server.Controller
 
                 Thread.Sleep(5000);
                 Console.WriteLine("Privatechat on port " + portnum + "is alive! Number of participants: " + clients.Count);
+
+                if(clients.Count == 1)
+                {
+                    foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
+                    {
+
+                        string disconnect_msg = "SERVER|!LEFT|Your partner";
+                        byte[] disconnect_data = Encoding.Unicode.GetBytes(disconnect_msg);
+
+                        try
+                        {
+                            NetworkStream clientstream = id_lastOne.Value.GetStream();
+                            clientstream.Write(disconnect_data, 0, disconnect_data.Length);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Exception: " + e.Message + ", removing the dead client");
+                            RemoveDeadClient(id_lastOne.Key, id_lastOne.Value);
+                        }
+
+                    }
+                }
                 //Thread.Yield();
             }
         }
