@@ -639,7 +639,7 @@ namespace server.Controller
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
-                command.Parameters.AddWithValue("@username_param", username);
+                command.Parameters.AddWithValue("@usernameparam", username);
 
 
                 try
@@ -695,7 +695,7 @@ namespace server.Controller
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
-                command.Parameters.AddWithValue("@username_param", username);
+                command.Parameters.AddWithValue("@usernameparam", username);
 
 
                 try
@@ -750,7 +750,7 @@ namespace server.Controller
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
-                command.Parameters.AddWithValue("@username_param", username);
+                command.Parameters.AddWithValue("@usernameparam", username);
 
 
                 try

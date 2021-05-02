@@ -261,6 +261,7 @@ namespace server.Controller
 
             try
             {
+                Console.WriteLine("MiscController: loading the firendlist of " + username);
                 List<string> mutualLikeList = DatabaseController.instance().GetMutualFriending(username);
                 List<string> onlyLovedBySenderList = DatabaseController.instance().GetOnlyLovedBySender(username);
                 List<string> onlySenderLovedByList = DatabaseController.instance().GetOnlySenderLovedBy(username);
@@ -273,8 +274,7 @@ namespace server.Controller
                 string reply = replypart1 + "!" + replypart2 + "!" + replypart3;
 
                 try
-                {
-                    Console.WriteLine("MiscController: loading the firendlist of " + username);
+                {                    
 
                     byte[] msg = Encoding.Unicode.GetBytes(reply);
                     stream.Write(msg);
