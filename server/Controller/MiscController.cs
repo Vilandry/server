@@ -60,119 +60,166 @@ namespace server.Controller
 
             if(commandargs[0] == "CONVSAVE")
             {
-                string savename = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3]; ;
-                string inserter = commandargs[4];
-                bool wasSaved = DatabaseController.instance().AlreadySavedChatHistory(savename);
+                ConvSave(commandargs, stream);
+            }
+            else if(commandargs[0] == "CONVLOAD")
+            {
+                ConvLoad(commandargs, stream);
+            }
+            else if (commandargs[0] == "LISTLOAD")
+            {
+                ListLoad(commandargs, stream);                
+            }
+            else if(commandargs[0] == "BLOCK")
+            {
+                Block(commandargs, stream);
+            }
+            else if(commandargs[0] == "FRIEND")
+            {
 
-                if(wasSaved)
+            }
+        }
+
+
+        private void ConvSave(string[] commandargs, NetworkStream stream)
+        {
+            string savename = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3]; ;
+            string inserter = commandargs[4];
+            bool wasSaved = DatabaseController.instance().AlreadySavedChatHistory(savename);
+
+            if (wasSaved)
+            {
+                try
                 {
-                    try
-                    {
-                        DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter);
-                        Console.WriteLine("MiscController: already inserted message history for " + inserter + " as " + savename);
-                    }
-                    catch(Exception e)
-                    {
-                        Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
-                        return;
-                    }
+                    bool success = DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter);
+                    Console.WriteLine("MiscController: already inserted message history for " + inserter + " as " + savename);
 
-
-                    try
+                    if (success)
                     {
                         byte[] okmsg = Encoding.Unicode.GetBytes("OK");
                         stream.Write(okmsg);
                     }
-                    catch(Exception e)
+                    else
                     {
-                        Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
-                        return;
-                    }
-                    
-                }
-                else
-                {
-                    try
-                    {
-                        byte[] okmsg = Encoding.Unicode.GetBytes("INSERT");
+                        byte[] okmsg = Encoding.Unicode.GetBytes("ER");
                         stream.Write(okmsg);
-
-
-                        Thread.Sleep(100);
-                        //Console.WriteLine("reading history...");
-                        string history = Utility.ReadFromNetworkStream(stream);
-                        if (DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter))
-                        {
-                            if (DatabaseController.instance().InsertMessageHistoryText(savename, history))
-                            {
-                                okmsg = Encoding.Unicode.GetBytes("OK");
-                                stream.Write(okmsg);
-                                Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text\n" + history);
-                            }
-                            else
-                            {
-                                okmsg = Encoding.Unicode.GetBytes("ER");
-                                Console.WriteLine("MiscController notice: could not insert history text! Consider deleting manually the connections!");
-                                stream.Write(okmsg);
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("MiscController notice: could not insert history connection!");
-                            okmsg = Encoding.Unicode.GetBytes("ER");
-                            stream.Write(okmsg);
-                        }
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("MiscController notice: could not reach client after inserting history text, exception message: " + e.Message);
-                        return;
-                    }
-                }
-            }
-            else if(commandargs[0] == "CONVLOAD")
-            {
-                try
-                {
-                    string convid = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3];
-                    string res = DatabaseController.instance().GetChatHistoryText(convid);                
 
-                    byte[] reply = Encoding.Unicode.GetBytes(res);
-
-                    stream.Write(reply);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("MiscController error: could not send convtext message to client! Error message: " + e.Message);
+                    Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
+                    return;
                 }
+
             }
-            else if (commandargs[0] == "LISTLOAD")
+            else
             {
                 try
                 {
-                    string username = commandargs[1];
-                    Console.WriteLine("MiscController: trying to get the list of " + username);
-                    string res = DatabaseController.instance().GetChatHistoryIDs(username);
+                    byte[] okmsg = Encoding.Unicode.GetBytes("INSERT");
+                    stream.Write(okmsg);
 
-                    /*foreach(string thingy in res)
+
+                    Thread.Sleep(100);
+                    //Console.WriteLine("reading history...");
+                    string history = Utility.ReadFromNetworkStream(stream);
+                    if (DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter))
                     {
-                        Console.Write(thingy + "   ");
+                        if (DatabaseController.instance().InsertMessageHistoryText(savename, history))
+                        {
+                            okmsg = Encoding.Unicode.GetBytes("OK");
+                            stream.Write(okmsg);
+                            Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text\n" + history);
+                        }
+                        else
+                        {
+                            okmsg = Encoding.Unicode.GetBytes("ER");
+                            Console.WriteLine("MiscController notice: could not insert history text! Consider deleting manually the connections!");
+                            stream.Write(okmsg);
+                        }
                     }
-
-                    string answer = String.Join("!", res);
-                    answer = answer + "!";*/
-
-                    byte[] reply = Encoding.Unicode.GetBytes(res);
-
-                    stream.Write(reply);
+                    else
+                    {
+                        Console.WriteLine("MiscController notice: could not insert history connection!");
+                        okmsg = Encoding.Unicode.GetBytes("ER");
+                        stream.Write(okmsg);
+                    }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    Console.WriteLine("MiscController error: could not send back convlist message to client! Error message: " + e.Message);
+                    Console.WriteLine("MiscController notice: could not reach client after inserting history text, exception message: " + e.Message);
+                    return;
                 }
-                
             }
+        }
+        private void ConvLoad(string[] commandargs, NetworkStream stream)
+        {
+            try
+            {
+                string convid = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3];
+                string res = DatabaseController.instance().GetChatHistoryText(convid);
 
+                byte[] reply = Encoding.Unicode.GetBytes(res);
+
+                stream.Write(reply);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("MiscController error: could not send convtext message to client! Error message: " + e.Message);
+            }
+        }
+        private void ListLoad(string[] commandargs, NetworkStream stream)
+        {
+            try
+            {
+                string username = commandargs[1];
+                Console.WriteLine("MiscController: trying to get the list of " + username);
+                string res = DatabaseController.instance().GetChatHistoryIDs(username);
+
+                /*foreach(string thingy in res)
+                {
+                    Console.Write(thingy + "   ");
+                }
+
+                string answer = String.Join("!", res);
+                answer = answer + "!";*/
+
+                byte[] reply = Encoding.Unicode.GetBytes(res);
+
+                stream.Write(reply);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("MiscController error: could not send back convlist message to client! Error message: " + e.Message);
+            }
+        }
+        private void Block(string[] commandargs, NetworkStream stream)
+        {
+            string blocker = commandargs[1];
+            string blocked = commandargs[2];
+            try
+            {
+                bool success = DatabaseController.instance().BlockUser(blocker, blocked);
+                Console.WriteLine("MiscController: blocking " + blocked + " by " + blocker);
+
+                if (success)
+                {
+                    byte[] okmsg = Encoding.Unicode.GetBytes("OK");
+                    stream.Write(okmsg);
+                }
+                else
+                {
+                    byte[] okmsg = Encoding.Unicode.GetBytes("ER");
+                    stream.Write(okmsg);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
+                return;
+            }
         }
     }
 }

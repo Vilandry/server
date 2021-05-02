@@ -26,8 +26,9 @@ namespace server.Controller
         private string initialCatalog;
 
 
-        private static readonly object llock = new object();
+        private static readonly object userllock = new object();
         private static readonly object historyllock = new object();
+        private static readonly object blockllock = new object();
 
         public static DatabaseController instance()
         {
@@ -184,7 +185,7 @@ namespace server.Controller
 
         public string GetAgeAndGender(string username)
         {
-            lock (llock)
+            lock (userllock)
             {
                 string commandText = "SELECT AGE, GENDER FROM Users WHERE username = @username_param";
 
@@ -231,7 +232,7 @@ namespace server.Controller
 
         public bool successfulRegister(string username, string password, int age, int sex)
         {
-            lock (llock)
+            lock (userllock)
             {
                 username = username.Replace("'", "\""); ///we wont let them use ' in registration, but better to be safe than sorry
                 string commandText = "SELECT COUNT (*) FROM Users WHERE username = @username_param";
@@ -283,7 +284,7 @@ namespace server.Controller
 
         public bool successfulLogin(string username, string password)
         {
-            lock (llock)
+            lock (userllock)
             {
                 string commandText = "SELECT password FROM Users WHERE username = @username_param";
 
@@ -346,7 +347,95 @@ namespace server.Controller
 
         public bool WasntBlockedBy(string blockedby, string blockedCandidate)
         {
-            return true;
+            lock (blockllock)
+            {
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+
+                    string commandText = "SELECT count(*) FROM BlockList WHERE blocker = @blockedby_param, blocked = @blockedCandidate_param";
+
+                    SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                    command.Parameters.AddWithValue("@blockedby_param", blockedby);
+                    command.Parameters.AddWithValue("@blockedCandidate_param", blockedCandidate);
+
+                    bool wasntblocked = false;
+                    try
+                    {
+                        if (!(connection.State == ConnectionState.Open))
+                        {
+                            connection.Open();
+                        }
+                        /*string rowsAffected = command.ExecuteReader().ToString();
+                        Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                        //Console.WriteLine("testdatabase");
+                        SqlDataReader reader = command.ExecuteReader();
+
+                        try
+                        {
+                            Console.WriteLine("DatabaseController: checking if " + blockedCandidate + " was blocked by " + blockedby);
+                            reader.Read();
+                            string res = String.Format("{0}", reader[0]);
+                            wasntblocked = (res == "0");
+
+                            Console.WriteLine("Blocked: " + res);
+                        }
+                        catch (Exception f)
+                        {
+                            Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f);
+                        }
+
+
+                        reader.Close();
+
+
+
+                        return wasntblocked;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("DatabaseController error in blocklist checking. Error message: " + ex.Message);
+                        return false; ///if there's an exception, just dont match them.
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error in blocklist checking. Error message: " + ex.Message);
+                    return false; ///if there's an exception, just dont match them.
+                }
+            }
+        }
+
+        public bool BlockUser(string blocker, string blocked)
+        {
+            lock(blockllock)
+            {
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    string insertText = "INSERT INTO Blocklist Values (@blockername, @blockedname)";
+
+                    SqlCommand command = new SqlCommand(insertText, connection);
+                    command.Parameters.AddWithValue("@blockername", blocker);
+                    command.Parameters.AddWithValue("@blockedname", blocked);
+
+
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error in blocklist insertion. Error message: " + ex.Message);
+                    return false;
+                }
+            }
         }
 
 
@@ -472,17 +561,25 @@ namespace server.Controller
                     //Console.WriteLine("testdatabase");
                     SqlDataReader reader = command.ExecuteReader();
 
-                    Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
-                    while (reader.Read())
+                    try
                     {
-                        string res = String.Format("{0}", reader[0]);
-                        Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
-                        if(reslist == "ER") { reslist = res; }
-                        else { reslist = reslist + "!" + res; }
-                        
-                    }
+                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
+                        while (reader.Read())
+                        {
+                            string res = String.Format("{0}", reader[0]);
+                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            if (reslist == "ER") { reslist = res; }
+                            else { reslist = reslist + "!" + res; }
 
-                    Console.Write("THE LIST: " + reslist + "\n");
+                        }
+
+                        //Console.Write("THE LIST: " + reslist + "\n");
+                    }
+                    catch(Exception f)
+                    {
+                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                    }
+                    
 
                     reader.Close();
 
@@ -516,17 +613,25 @@ namespace server.Controller
                     Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
                     //Console.WriteLine("testdatabase");
                     SqlDataReader reader = command.ExecuteReader();
-
                     string res = "ER";
-                    if (reader.Read())
-                    {
-                        res = String.Format("{0}", reader[0]);
-                        Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
+
+                    try
+                    {                       
+                        if (reader.Read())
+                        {
+                            res = String.Format("{0}", reader[0]);
+                            Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
+                        }
+                        else
+                        {
+                            Console.WriteLine("DatabaseController notice: there is no text for" + historyID + ", sending ER!");
+                        }
                     }
-                    else
+                    catch(Exception e)
                     {
-                        Console.WriteLine("DatabaseController error: there is no text for" + historyID + ", sending ER!");
+                        Console.WriteLine("DatabaseController error: error during reading chathistory text. Error message: " + e.Message);
                     }
+                    
 
 
                     reader.Close();
