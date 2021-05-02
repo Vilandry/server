@@ -658,7 +658,7 @@ namespace server.Controller
                         while (reader.Read())
                         {
                             string res = String.Format("{0}", reader[0]);
-                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            Console.WriteLine("DatabaseController: " + res + " and " + username + " are mutual friends!");
                             reslist.Add(res);
 
                         }
@@ -713,7 +713,7 @@ namespace server.Controller
                         while (reader.Read())
                         {
                             string res = String.Format("{0}", reader[0]);
-                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            Console.WriteLine("DatabaseController: " + res + " left-friend " + username + "!");
                             reslist.Add(res);
 
                         }
@@ -767,7 +767,7 @@ namespace server.Controller
                         while (reader.Read())
                         {
                             string res = String.Format("{0}", reader[0]);
-                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            Console.WriteLine("DatabaseController: " + res + " right-friend " + username + "!");
                             reslist.Add(res);
 
                         }
