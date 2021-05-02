@@ -744,7 +744,7 @@ namespace server.Controller
 
             lock (friendllock)
             {
-                string commandText = "select sender from friendlist where befriended = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
+                string commandText = "select befriended from friendlist where sender = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
