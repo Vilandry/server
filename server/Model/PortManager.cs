@@ -220,7 +220,7 @@ namespace server.Model
 
                     if (groupChatPorts.Count == 0)
                     {
-                        Console.WriteLine("Portmanager notice: No privateChatPorts given, using its default value of range 21001-29999.");
+                        Console.WriteLine("Portmanager notice: No groupChatPorts given, using its default value of range 21001-29999.");
                         for (int i = 21001; i < 29999; i++)
                     {
                         groupChatPorts.Enqueue(i);

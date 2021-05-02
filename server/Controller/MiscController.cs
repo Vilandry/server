@@ -175,7 +175,9 @@ namespace server.Controller
             {
                 string username = commandargs[1];
                 Console.WriteLine("MiscController: trying to get the list of " + username);
-                string res = DatabaseController.instance().GetChatHistoryIDs(username);
+
+                List<string> reslist = DatabaseController.instance().GetChatHistoryIDs(username);
+                string res = String.Join("!", reslist);
 
                 /*foreach(string thingy in res)
                 {
@@ -198,6 +200,33 @@ namespace server.Controller
         {
             string blocker = commandargs[1];
             string blocked = commandargs[2];
+            try
+            {
+                bool success = DatabaseController.instance().BlockUser(blocker, blocked);
+                Console.WriteLine("MiscController: blocking " + blocked + " by " + blocker);
+
+                if (success)
+                {
+                    byte[] okmsg = Encoding.Unicode.GetBytes("OK");
+                    stream.Write(okmsg);
+                }
+                else
+                {
+                    byte[] okmsg = Encoding.Unicode.GetBytes("ER");
+                    stream.Write(okmsg);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
+                return;
+            }
+        }
+        private void Friend(string[] commandargs, NetworkStream stream)
+        {
+            string friender = commandargs[1];
+            string friended = commandargs[2];
             try
             {
                 bool success = DatabaseController.instance().BlockUser(blocker, blocked);

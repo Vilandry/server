@@ -29,6 +29,7 @@ namespace server.Controller
         private static readonly object userllock = new object();
         private static readonly object historyllock = new object();
         private static readonly object blockllock = new object();
+        private static readonly object friendllock = new object();
 
         public static DatabaseController instance()
         {
@@ -438,6 +439,34 @@ namespace server.Controller
             }
         }
 
+        public bool FriendUser(string friender, string friended)
+        {
+            lock (friendllock)
+            {
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    string insertText = "INSERT INTO FriendList Values (@friender_name, @friended_name)";
+
+                    SqlCommand command = new SqlCommand(insertText, connection);
+                    command.Parameters.AddWithValue("@friender_name", friender);
+                    command.Parameters.AddWithValue("@friended_name", friended);
+
+
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error in blocklist insertion. Error message: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
 
 
 
@@ -539,9 +568,65 @@ namespace server.Controller
             }            
         }
 
-        public string GetChatHistoryIDs(string username)
+        public List<string> GetChatHistoryIDs(string username)
         {
             lock (historyllock)
+            {
+                string commandText = "SELECT chatname FROM HistoryConnector WHERE saver = @username_param";
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@username_param", username);
+
+                List<string> reslist = new List<string>();
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    try
+                    {
+                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
+                        while (reader.Read())
+                        {
+                            string res = String.Format("{0}", reader[0]);
+                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            reslist.Add(res);
+
+                        }
+
+                        //Console.Write("THE LIST: " + reslist + "\n");
+                    }
+                    catch(Exception f)
+                    {
+                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                    }
+                    
+
+                    reader.Close();
+
+                    return reslist;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                    return reslist;
+                }
+            }
+        }
+
+        public List<string> GetMutualFriending(string username)
+        {
+            List<string> mutuallyLiked = new List<string>();
+
+
+            lock (friendllock)
             {
                 string commandText = "SELECT chatname FROM HistoryConnector WHERE saver = @username_param";
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
@@ -575,22 +660,23 @@ namespace server.Controller
 
                         //Console.Write("THE LIST: " + reslist + "\n");
                     }
-                    catch(Exception f)
+                    catch (Exception f)
                     {
                         Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
                     }
-                    
+
 
                     reader.Close();
 
-                    return reslist;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
-                    return "ER";
                 }
             }
+
+
+            return mutuallyLiked;
         }
 
         public string GetChatHistoryText(string historyID)
