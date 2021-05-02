@@ -655,7 +655,6 @@ namespace server.Controller
 
                     try
                     {
-                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
                         while (reader.Read())
                         {
                             string res = String.Format("{0}", reader[0]);
@@ -711,7 +710,6 @@ namespace server.Controller
 
                     try
                     {
-                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
                         while (reader.Read())
                         {
                             string res = String.Format("{0}", reader[0]);
@@ -765,8 +763,7 @@ namespace server.Controller
                     SqlDataReader reader = command.ExecuteReader();
 
                     try
-                    {
-                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
+                    {                        
                         while (reader.Read())
                         {
                             string res = String.Format("{0}", reader[0]);
