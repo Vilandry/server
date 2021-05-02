@@ -357,7 +357,7 @@ namespace server.Controller
                         connection.Open();
                     }
 
-                    string commandText = "SELECT count(*) FROM BlockList WHERE blocker = @blockedby_param, blocked = @blockedCandidate_param";
+                    string commandText = "SELECT count(*) FROM BlockList WHERE blocker = @blockedby_param and blocked = @blockedCandidate_param";
 
                     SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
