@@ -229,8 +229,8 @@ namespace server.Controller
             string friended = commandargs[2];
             try
             {
-                bool success = DatabaseController.instance().BlockUser(blocker, blocked);
-                Console.WriteLine("MiscController: blocking " + blocked + " by " + blocker);
+                bool success = DatabaseController.instance().FriendUser(friender, friended);
+                Console.WriteLine("MiscController: adding " + friended + " as friend for " + friender);
 
                 if (success)
                 {
