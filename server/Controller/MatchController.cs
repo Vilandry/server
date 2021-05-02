@@ -273,7 +273,7 @@ namespace server.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine("RecreateUser error, error message: " + e.Message);
+                Console.WriteLine("MatchController error: RecreateUser error, error message: " + e.Message);
             }
 
 
@@ -384,11 +384,11 @@ namespace server.Controller
             {
                 if (removeFromClientList(commandargs[1]))
                 {
-                    Console.WriteLine(commandargs[1] + " succesfully removed from clientlist!");
+                    Console.WriteLine("MatchController:" + commandargs[1] + " succesfully removed from clientlist!");
                 }
                 else
                 {
-                    Console.WriteLine(commandargs[1] + " couldnt be removed from clientlist!");
+                    Console.WriteLine("MatchController:" + commandargs[1] + " couldnt be removed from clientlist!");
                 }
             }
             else
