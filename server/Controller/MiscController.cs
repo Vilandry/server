@@ -273,6 +273,8 @@ namespace server.Controller
 
                 string reply = replypart1 + "!" + replypart2 + "!" + replypart3;
 
+                Console.WriteLine("MiscController TEMP: " + reply);
+
                 try
                 {                    
 
