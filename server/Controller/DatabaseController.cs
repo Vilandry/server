@@ -429,6 +429,13 @@ namespace server.Controller
 
 
                     command.ExecuteNonQuery();
+
+
+                    string deleteText = "DELETE FROM Friendlist where sender = @usernameparam";
+                    command = new SqlCommand(insertText, connection);
+                    command.Parameters.AddWithValue("@usernameparam", blocker);
+                    command.ExecuteNonQuery();
+
                     return true;
                 }
                 catch (Exception ex)
@@ -483,6 +490,7 @@ namespace server.Controller
                     TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
                     int curtime = (int)t.TotalSeconds;
                     string insertText = "INSERT INTO HistoryConnector Values (@hname, @uname)";
+                    Console.WriteLine("DatabaseController: inserting connection to messagehistory entry " + messagehistoryname + "for user " + inserter);
 
                     SqlCommand command = new SqlCommand(insertText, connection);
                     command.Parameters.AddWithValue("@hname", messagehistoryname);
@@ -511,14 +519,13 @@ namespace server.Controller
                         connection.Open();
                     }
                     string insertText = "INSERT INTO MessageHistory Values (@hname, @text)";
+                    Console.WriteLine("DatabaseController: inserting text for messagehistory entry " + messagehistoryname);
 
                     SqlCommand command = new SqlCommand(insertText, connection);
                     command.Parameters.AddWithValue("@hname", messagehistoryname);
                     command.Parameters.AddWithValue("@text", text);
 
                     int res = command.ExecuteNonQuery();
-
-                    Console.WriteLine("TEMP TEMP TEMP: " + res);
 
                     return true;
                 }
@@ -623,17 +630,17 @@ namespace server.Controller
 
         public List<string> GetMutualFriending(string username)
         {
-            List<string> mutuallyLiked = new List<string>();
+            List<string> reslist = new List<string>();
 
 
             lock (friendllock)
             {
-                string commandText = "SELECT chatname FROM HistoryConnector WHERE saver = @username_param";
+                string commandText = "select befriended from friendlist  where sender = @usernameparam   intersect select sender from friendlist where befriended = @usernameparam";
+
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
                 command.Parameters.AddWithValue("@username_param", username);
 
-                string reslist = "ER";
 
                 try
                 {
@@ -653,8 +660,7 @@ namespace server.Controller
                         {
                             string res = String.Format("{0}", reader[0]);
                             Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
-                            if (reslist == "ER") { reslist = res; }
-                            else { reslist = reslist + "!" + res; }
+                            reslist.Add(res);
 
                         }
 
@@ -676,7 +682,116 @@ namespace server.Controller
             }
 
 
-            return mutuallyLiked;
+            return reslist;
+        }
+        public List<string> GetOnlySenderLovedBy(string username)
+        {
+            List<string> reslist = new List<string>();
+
+
+            lock (friendllock)
+            {
+                string commandText = "select sender from friendlist where befriended = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
+
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@username_param", username);
+
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    try
+                    {
+                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
+                        while (reader.Read())
+                        {
+                            string res = String.Format("{0}", reader[0]);
+                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            reslist.Add(res);
+
+                        }
+
+                        //Console.Write("THE LIST: " + reslist + "\n");
+                    }
+                    catch (Exception f)
+                    {
+                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                    }
+
+
+                    reader.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                }
+            }
+            return reslist;
+        }
+
+        public List<string> GetOnlyLovedBySender(string username)
+        {
+            List<string> reslist = new List<string>();
+
+
+            lock (friendllock)
+            {
+                string commandText = "select sender from friendlist where befriended = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
+
+                SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
+
+                command.Parameters.AddWithValue("@username_param", username);
+
+
+                try
+                {
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    /*string rowsAffected = command.ExecuteReader().ToString();
+                    Console.WriteLine("RowsAffected: {0}", rowsAffected);*/
+                    //Console.WriteLine("testdatabase");
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    try
+                    {
+                        Console.WriteLine("DatabaseController: retireving things from HistoryConnector where saver = " + username);
+                        while (reader.Read())
+                        {
+                            string res = String.Format("{0}", reader[0]);
+                            Console.WriteLine("DatabaseController: " + res + " was saved by " + username + "!");
+                            reslist.Add(res);
+
+                        }
+
+                        //Console.Write("THE LIST: " + reslist + "\n");
+                    }
+                    catch (Exception f)
+                    {
+                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                    }
+
+
+                    reader.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("DatabaseController error: cannot retrieve the saveIDs of" + username + ", error message: " + ex.Message/* + "\nStactrace: " + ex.StackTrace*/);
+                }
+            }
+            return reslist;
         }
 
         public string GetChatHistoryText(string historyID)
@@ -706,7 +821,8 @@ namespace server.Controller
                         if (reader.Read())
                         {
                             res = String.Format("{0}", reader[0]);
-                            Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
+                            //Console.WriteLine("DatabaseController: " + res + " was the text of  " + historyID + "!");
+                            Console.WriteLine("DatabaseController: getting the text of entry " + historyID);
                         }
                         else
                         {

@@ -416,7 +416,7 @@ namespace server.Controller
                         }
                     }
                     privatechatsThreads = aliveThreads;
-                    Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
+                    //Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
                 }
                 Thread.Sleep(10000);
             }

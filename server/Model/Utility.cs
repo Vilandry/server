@@ -46,7 +46,7 @@ namespace server.Model
                 string newmessage = Encoding.Unicode.GetString(bytes, 0, i);
                 message = message + newmessage;
                 byteCount += i;
-                Console.WriteLine(newmessage);
+                //Console.WriteLine(newmessage);
             } while (stream.DataAvailable);
 
 

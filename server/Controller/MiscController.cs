@@ -76,7 +76,11 @@ namespace server.Controller
             }
             else if(commandargs[0] == "FRIEND")
             {
-
+                Friend(commandargs, stream);
+            }
+            else if (commandargs[0] == "FRIENDLOAD")
+            {
+                FriendLoad(commandargs, stream);
             }
         }
 
@@ -241,6 +245,45 @@ namespace server.Controller
                 {
                     byte[] okmsg = Encoding.Unicode.GetBytes("ER");
                     stream.Write(okmsg);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
+                return;
+            }
+        }
+
+        private void FriendLoad(string[] commandargs, NetworkStream stream)
+        {
+            string username = commandargs[1];
+
+            try
+            {
+                List<string> mutualLikeList = DatabaseController.instance().GetMutualFriending(username);
+                List<string> onlyLovedBySenderList = DatabaseController.instance().GetOnlyLovedBySender(username);
+                List<string> onlySenderLovedByList = DatabaseController.instance().GetOnlySenderLovedBy(username);
+
+
+                string replypart1 = String.Join("|", mutualLikeList);
+                string replypart2 = String.Join("|", onlyLovedBySenderList);
+                string replypart3 = String.Join("|", onlySenderLovedByList);
+
+                string reply = replypart1 + "!" + replypart2 + "!" + replypart3;
+
+                try
+                {
+                    Console.WriteLine("MiscController: loading the firendlist of " + username);
+
+                    byte[] msg = Encoding.Unicode.GetBytes(reply);
+                    stream.Write(msg);
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("MiscController error: could not reach client, error message: " + e.Message);
+                    return;
                 }
 
             }
