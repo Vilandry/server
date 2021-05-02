@@ -82,9 +82,9 @@ namespace server.Controller
                         NetworkStream ns = client.GetStream();
                         Console.WriteLine("Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
 
-                        //if (ns.DataAvailable)
+                        if (ns.DataAvailable)
                         {
-                            //Console.WriteLine("Dataavailable on portnum " + portnum);
+                            Console.WriteLine("Dataavailable on portnum " + portnum);
 
                             string message = Utility.ReadFromNetworkStream(ns);
                             Console.WriteLine(message);
