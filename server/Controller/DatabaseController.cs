@@ -432,7 +432,7 @@ namespace server.Controller
 
 
                     string deleteText = "DELETE FROM Friendlist where sender = @usernameparam";
-                    command = new SqlCommand(insertText, connection);
+                    command = new SqlCommand(deleteText, connection);
                     command.Parameters.AddWithValue("@usernameparam", blocker);
                     command.ExecuteNonQuery();
 
