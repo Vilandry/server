@@ -162,7 +162,7 @@ namespace server.Model
                                         break;
 
                                     default:
-                                        Console.WriteLine("Portmanager warning: Unknown porttype " + arg + "! Value is discarded!");
+                                        Console.WriteLine("Portmanager exception: Unknown porttype " + arg + "! Value is discarded!");
                                         break;
                                 }
                             }

@@ -48,13 +48,13 @@ namespace server.Controller
                 while (ongoing)
                 {
                     TcpClient client = server.AcceptTcpClient();
-                    Console.WriteLine("A client has joined to the private chat on port " + portnum);
+                    Console.WriteLine("PrivateChatController: A client has joined to the private chat on port " + portnum);
                     lock (llock)
                     {
                         bool success = clients.TryAdd(id, client);
                         if (!success)
                         {
-                            Console.WriteLine("Couldnt add the joining client to the clientlist on port " + portnum);
+                            Console.WriteLine("PrivateChatController: Couldnt add the joining client to the clientlist on port " + portnum);
                         }
                     }
 
@@ -64,7 +64,7 @@ namespace server.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error on port " + portnum + ", error message: " + e.Message);
+                Console.WriteLine("PrivateChatController: Error on port " + portnum + ", error message: " + e.Message);
             }
 
         }
@@ -80,11 +80,11 @@ namespace server.Controller
                         int parentId = id_client.Key;
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
-                        Console.WriteLine("Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
+                        //Console.WriteLine("TEMP: Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
 
                         if (ns.DataAvailable)
                         {
-                            Console.WriteLine("Dataavailable on portnum " + portnum);
+                            //Console.WriteLine("TEMP: Dataavailable on portnum " + portnum);
 
                             string message = Utility.ReadFromNetworkStream(ns);
                             Console.WriteLine(message);
@@ -137,8 +137,8 @@ namespace server.Controller
                     }
                 }
 
-                Thread.Sleep(5000);
-                Console.WriteLine("Privatechat on port " + portnum + "is alive! Number of participants: " + clients.Count);
+                Thread.Sleep(200);
+                Console.WriteLine("PrivateChatController: chat on port " + portnum + "is alive! Number of participants: " + clients.Count);
 
                 if(clients.Count == 1)
                 {
@@ -155,7 +155,7 @@ namespace server.Controller
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Exception: " + e.Message + ", removing the dead client");
+                            Console.WriteLine("PrivateChatController exception: " + e.Message + ", removing the dead client");
                             RemoveDeadClient(id_lastOne.Key, id_lastOne.Value);
                         }
 
@@ -169,7 +169,7 @@ namespace server.Controller
         {
             clients.Remove(id, out deadclient);
             count--;
-            Console.WriteLine("Dead client removed with id: " + id + "on port " + portnum);
+            Console.WriteLine("PrivateChatController: Dead client removed with id: " + id + "on port " + portnum);
             foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
             {
 
@@ -183,7 +183,7 @@ namespace server.Controller
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Exception: " + e.Message + ", removing the dead client");
+                    Console.WriteLine("PrivateChatController exception: " + e.Message + ", removing the dead client");
                     RemoveDeadClient(id_lastOne.Key, id_lastOne.Value);
                 }
 
@@ -198,7 +198,7 @@ namespace server.Controller
         private void handleCommands(string command)
         {
             string[] commandargs = command.Split("|");
-            Console.WriteLine("HandleCommand: " + command + " on portnum " + portnum);
+            Console.WriteLine("PrivateChatController: HandleCommand: " + command + " on portnum " + portnum);
             if(commandargs[0] == "!LEAVE")
             {
                 Console.WriteLine("PrivateChatController: ending chat on port " + portnum);

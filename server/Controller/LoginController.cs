@@ -47,7 +47,7 @@ namespace server.Controller
                     NetworkStream stream = client.GetStream();
 
                     message = Utility.ReadFromNetworkStream(stream);
-                    Console.WriteLine("Recieved during login: " + message);
+                    Console.WriteLine("LoginController:  recieved during login or register attempt: " + message);
 
 
                     ///<<------------------->>///
@@ -89,7 +89,7 @@ namespace server.Controller
                         log = log + DatabaseController.instance().GetAgeAndGender(username);
                         msg = Encoding.Unicode.GetBytes(log);
 
-                        Console.WriteLine("Successful login, login data: " + log);
+                        Console.WriteLine("LoginController: Successful login, login data: " + log);
                     }
                     else
                     {                     
@@ -100,13 +100,13 @@ namespace server.Controller
 
                     // Send back a response.
                     stream.Write(msg, 0, msg.Length);
-                    Console.WriteLine(log + "data was sent to the client!");
+                    Console.WriteLine("LoginController: " + log + "data was sent to the client!");
 
                     
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine("Exception: " + e.Message + ", so probably someone left");
+                    Console.WriteLine("LoginController exception: probably someone left, error message: " + e.Message);
                 }
                 finally
                 {
