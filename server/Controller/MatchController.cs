@@ -401,6 +401,7 @@ namespace server.Controller
         {
             while(true)
             {
+                ConcurrentDictionary<PrivateChatController, Thread> AliveThreads = new ConcurrentDictionary<PrivateChatController, Thread>();
                 lock(llock)
                 {
                     foreach(KeyValuePair<PrivateChatController, Thread> t in privatechatsThreads)
@@ -416,14 +417,13 @@ namespace server.Controller
                             {
                                 Console.WriteLine("MatchController: powerkill on PrivateChatThread on port " + t.Key.Portnum);
                             }
-                            
-                            privatechatsThreads.TryRemove(t);
                         }
                         else
                         {
-                            Console.WriteLine("MatchController: removing dead chatthread.");
+                            AliveThreads.TryAdd(t.Key, t.Value);
                         }
                     }
+                    privatechatsThreads = AliveThreads;
                     Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
                 }
                 Thread.Sleep(10000);
