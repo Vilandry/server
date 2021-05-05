@@ -81,7 +81,7 @@ namespace server.Controller
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
                         Console.WriteLine("TEMP: Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
-                        Console.WriteLine("hash->" + ns.GetHashCode() )
+                        Console.WriteLine("hash->" + ns.GetHashCode());
                         if (ns.DataAvailable)
                         {
 
