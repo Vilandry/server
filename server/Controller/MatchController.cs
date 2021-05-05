@@ -62,7 +62,7 @@ namespace server.Controller
                 try
                 {
                     string raw_info = Utility.ReadFromNetworkStream(ns);
-                    Console.WriteLine("Raw info: " + raw_info);
+                    //Console.WriteLine("MatchController: Raw info: " + raw_info);
 
                     if (raw_info[0] == '!')
                     {
