@@ -405,8 +405,18 @@ namespace server.Controller
                 {
                     foreach(KeyValuePair<PrivateChatController, Thread> t in privatechatsThreads)
                     {
+                        Console.WriteLine("TEMP: TRY TO REMOVE SHIT");
                         if(t.Key.Ongoing == false)
                         {
+                            try
+                            {
+                                t.Value.Abort();
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine("MatchController: powerkill on privatechatthread on port " + t.Key.Portnum);
+                            }
+                            
                             privatechatsThreads.TryRemove(t);
                         }
                         else
@@ -414,7 +424,7 @@ namespace server.Controller
                             Console.WriteLine("MatchController: removing dead chatthread.");
                         }
                     }
-                    //Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
+                    Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
                 }
                 Thread.Sleep(10000);
             }

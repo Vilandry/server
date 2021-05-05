@@ -25,6 +25,7 @@ namespace server.Controller
 
 
         public bool Ongoing { get { return ongoing; } }
+        public int Portnum { get { return portnum; } }
 
         public PrivateChatController(int port, CHATTPYE t)
         {
