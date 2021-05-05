@@ -667,7 +667,7 @@ namespace server.Controller
                     }
                     catch (Exception f)
                     {
-                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                        Console.WriteLine("DatabaseController warning: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
                     }
 
 
@@ -722,7 +722,7 @@ namespace server.Controller
                     }
                     catch (Exception f)
                     {
-                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                        Console.WriteLine("DatabaseController warning: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
                     }
 
 
@@ -776,7 +776,7 @@ namespace server.Controller
                     }
                     catch (Exception f)
                     {
-                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
+                        Console.WriteLine("DatabaseController warning: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f.Message);
                     }
 
 

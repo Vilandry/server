@@ -110,7 +110,7 @@ namespace server.Controller
                                     }
                                     catch (Exception e)
                                     {
-                                        Console.WriteLine("Exception during private chat on port " + portnum + "error message: " + e.Message + ". Client removed from clients");
+                                        Console.WriteLine("PrivateChatController exception during private chat on port " + portnum + "error message: " + e.Message + ". Client removed from clients");
                                         RemoveDeadClient(id, destination);
 
 

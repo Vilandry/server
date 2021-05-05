@@ -51,6 +51,7 @@ namespace server.Model
                         miscport = -1;
 
                         takenPorts = new HashSet<int>();
+                        takenPorts.Add(9000);
                         string line;
                         // Read and display lines from the file until the end of
                         // the file is reached.
@@ -74,10 +75,17 @@ namespace server.Model
                                         }
                                         else
                                         {
-                                            if (!InsertSinglePort(portrange[0], ref matchport))
+
+                                            if (matchport != -1)
                                             {
-                                                Environment.Exit(0);
-                                                Console.ReadKey();
+                                                Console.WriteLine("PortManager warning: Overwriting attempt on already setted port matchport. Old value was " + matchport);
+
+
+                                                if (!InsertSinglePort(portrange[0], ref matchport))
+                                                {
+                                                    Environment.Exit(0);
+                                                    Console.ReadKey();
+                                                }
                                             }
                                         }
                                         break;
@@ -85,12 +93,17 @@ namespace server.Model
                                     case "loginport":
                                         if (portrange.Length > 1)
                                         {
-                                            Console.WriteLine("Portmanager error: Cannot use range for matchport! Exiting program...");
+                                            Console.WriteLine("Portmanager error: Cannot use range for loginport! Exiting program...");
                                             Environment.Exit(0);
                                             Console.ReadKey();
                                         }
                                         else
                                         {
+                                            if(loginport != -1)
+                                            {
+                                                Console.WriteLine("PortManager warning: Overwriting attempt on already setted port loginport. Old value was " + loginport);
+                                            }
+
                                             if (!InsertSinglePort(portrange[0], ref loginport))
                                             {
                                                 Environment.Exit(0);
@@ -102,12 +115,17 @@ namespace server.Model
                                     case "miscport":
                                         if (portrange.Length > 1)
                                         {
-                                            Console.WriteLine("Portmanager error: Cannot use range for matchport! Exiting program...");
+                                            Console.WriteLine("Portmanager error: Cannot use range for miscport! Exiting program...");
                                             Environment.Exit(0);
                                             Console.ReadKey();
                                         }
                                         else
                                         {
+                                            if (loginport != -1)
+                                            {
+                                                Console.WriteLine("PortManager warning: Overwriting attempt on already setted port miscport. Old value was " + miscport);
+                                            }
+
                                             if (!InsertSinglePort(portrange[0], ref miscport))
                                             {
                                                 Environment.Exit(0);
@@ -132,6 +150,11 @@ namespace server.Model
                                         }
                                         else
                                         {
+                                            if (privateChatPorts.Count > 0)
+                                            {
+                                                Console.WriteLine("PortManager notice: privateChatPorts were already inserted, now trying to append a new range of ports.");
+                                            }
+
                                             string lower = portrange[0];
                                             string upper = portrange[1];
                                             if (!InsertPortRange(lower, upper, privateChatPorts))
@@ -151,6 +174,11 @@ namespace server.Model
                                         }
                                         else
                                         {
+                                            if(groupChatPorts.Count > 0)
+                                            {
+                                                Console.WriteLine("PortManager notice: groupChatPorts were already inserted, now trying to append a new range of ports.");
+                                            }
+
                                             string lower = portrange[0];
                                             string upper = portrange[1];
                                             if (!InsertPortRange(lower, upper, groupChatPorts))

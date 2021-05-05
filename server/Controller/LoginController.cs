@@ -106,7 +106,7 @@ namespace server.Controller
                 }
                 catch(Exception e)
                 {
-                    Console.WriteLine("LoginController exception: probably someone left, error message: " + e.Message);
+                    Console.WriteLine("LoginController exception: probably someone left during login attempt, error message: " + e.Message);
                 }
                 finally
                 {
