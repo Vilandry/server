@@ -140,7 +140,7 @@ namespace server.Controller
                 Thread.Sleep(200);
                 Console.WriteLine("PrivateChatController: chat on port " + portnum + "is alive! Number of participants: " + clients.Count);
 
-                if(clients.Count == 1)
+                /*if(clients.Count == 1)
                 {
                     foreach (KeyValuePair<int, TcpClient> id_lastOne in clients)
                     {
@@ -160,7 +160,7 @@ namespace server.Controller
                         }
 
                     }
-                }
+                }*/
                 //Thread.Yield();
             }
         }
