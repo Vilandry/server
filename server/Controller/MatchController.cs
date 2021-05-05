@@ -73,12 +73,12 @@ namespace server.Controller
                         MatchUser joineduser = RecreateUser(raw_info);
                         joineduser.Client = client;
 
-                        Console.WriteLine("Joined " + joineduser.ToString());
+                        Console.WriteLine("MatchController: Joined " + joineduser.ToString());
 
                         byte[] data = Encoding.Unicode.GetBytes("OK");
 
                         ns.Write(data, 0, data.Length);
-                        Console.WriteLine("Replied with " + Encoding.Unicode.GetString(data));
+                        Console.WriteLine("MatchController: Replied with " + Encoding.Unicode.GetString(data));
 
                         lock (llock)
                         {
