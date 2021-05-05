@@ -405,7 +405,7 @@ namespace server.Controller
                 {
                     foreach(KeyValuePair<PrivateChatController, Thread> t in privatechatsThreads)
                     {
-                        Console.WriteLine("TEMP: TRY TO REMOVE SHIT");
+                        //Console.WriteLine("TEMP: TRY TO REMOVE SHIT");
                         if(t.Key.Ongoing == false)
                         {
                             try
@@ -414,7 +414,7 @@ namespace server.Controller
                             }
                             catch(Exception e)
                             {
-                                Console.WriteLine("MatchController: powerkill on privatechatthread on port " + t.Key.Portnum);
+                                Console.WriteLine("MatchController: powerkill on PrivateChatThread on port " + t.Key.Portnum);
                             }
                             
                             privatechatsThreads.TryRemove(t);
