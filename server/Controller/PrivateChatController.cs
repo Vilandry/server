@@ -73,6 +73,7 @@ namespace server.Controller
         {
             while (ongoing)
             {
+                Thread.Sleep(5000);
                 lock (llock)
                 {
                     foreach (KeyValuePair<int, TcpClient> id_client in clients)
@@ -139,7 +140,7 @@ namespace server.Controller
                     }
                 }
 
-                Thread.Sleep(5000);
+                
                 Console.WriteLine("PrivateChatController: chat on port " + portnum + "is alive! Number of participants: " + clients.Count);
 
                 /*if(clients.Count == 1)
