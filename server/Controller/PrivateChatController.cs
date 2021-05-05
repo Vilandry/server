@@ -14,8 +14,8 @@ namespace server.Controller
 {
     class PrivateChatController
     {
-        private static readonly object llock = new object();
-        private static ConcurrentDictionary<int, TcpClient> clients;
+        private readonly object llock = new object();
+        private ConcurrentDictionary<int, TcpClient> clients;
         private int count;
         private int id;
         private int portnum;
@@ -80,7 +80,7 @@ namespace server.Controller
                         int parentId = id_client.Key;
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
-                        Console.WriteLine("TEMP: Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
+                        Console.WriteLine("TEMP: Trying to read on port " + portnum + " with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
                         Console.WriteLine("hash->" + ns.GetHashCode());
                         if (ns.DataAvailable)
                         {
