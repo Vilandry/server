@@ -94,7 +94,7 @@ namespace server.Controller
                             //Console.WriteLine("TEMP: Dataavailable on portnum " + portnum);
 
                             string message = Utility.ReadFromNetworkStream(ns);
-                            Console.WriteLine(message);
+                            //Console.WriteLine(message);
                             //conversationHistory.Add(Utility.EscapePrivateChat(message));
 
                             if (message[0] == '!')
