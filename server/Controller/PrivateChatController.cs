@@ -80,10 +80,12 @@ namespace server.Controller
                         int parentId = id_client.Key;
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
-                        //Console.WriteLine("TEMP: Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
-
+                        Console.WriteLine("TEMP: Trying to read on port " + portnum + "with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
+                        Console.WriteLine("hash->" + ns.GetHashCode() )
                         if (ns.DataAvailable)
                         {
+
+                            
                             //Console.WriteLine("TEMP: Dataavailable on portnum " + portnum);
 
                             string message = Utility.ReadFromNetworkStream(ns);
@@ -137,7 +139,7 @@ namespace server.Controller
                     }
                 }
 
-                Thread.Sleep(200);
+                Thread.Sleep(5000);
                 Console.WriteLine("PrivateChatController: chat on port " + portnum + "is alive! Number of participants: " + clients.Count);
 
                 /*if(clients.Count == 1)
