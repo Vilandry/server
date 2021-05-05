@@ -23,6 +23,9 @@ namespace server.Controller
         private CHATTPYE type;
         private bool ongoing;
 
+
+        public bool Ongoing { get { return ongoing; } }
+
         public PrivateChatController(int port, CHATTPYE t)
         {
             count = 0;
@@ -73,7 +76,7 @@ namespace server.Controller
         {
             while (ongoing)
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(200);
                 lock (llock)
                 {
                     foreach (KeyValuePair<int, TcpClient> id_client in clients)
@@ -81,8 +84,8 @@ namespace server.Controller
                         int parentId = id_client.Key;
                         TcpClient client = id_client.Value;
                         NetworkStream ns = client.GetStream();
-                        Console.WriteLine("TEMP: Trying to read on port " + portnum + " with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
-                        Console.WriteLine("hash->" + ns.GetHashCode());
+                        //Console.WriteLine("TEMP: Trying to read on port " + portnum + " with result of " + ns.CanRead + " and dataavailable: " + ns.DataAvailable);
+                        //Console.WriteLine("hash->" + ns.GetHashCode());
                         if (ns.DataAvailable)
                         {
 
@@ -141,7 +144,7 @@ namespace server.Controller
                 }
 
                 
-                Console.WriteLine("PrivateChatController: chat on port " + portnum + "is alive! Number of participants: " + clients.Count);
+                //Console.WriteLine("PrivateChatController: chat on port " + portnum + "is alive! Number of participants: " + clients.Count);
 
                 /*if(clients.Count == 1)
                 {
@@ -223,6 +226,7 @@ namespace server.Controller
                     
                 }
                 ongoing = false;
+                
             }
             else
             {
