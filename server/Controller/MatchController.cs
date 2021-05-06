@@ -61,7 +61,13 @@ namespace server.Controller
 
                 try
                 {
-                    string raw_info = Utility.ReadFromNetworkStream(ns);
+                    KeyValuePair<bool, string> pair = Utility.ReadFromNetworkStream(ns);
+
+                    if (pair.Key == false) { Console.WriteLine("MatchController: invalid syntax on message, discarding request."); continue; }
+
+                    string raw_info = pair.Value;
+
+                    //string raw_info = Utility.ReadFromNetworkStream(ns);
                     //Console.WriteLine("MatchController: Raw info: " + raw_info);
 
                     if (raw_info[0] == '!')
@@ -352,7 +358,14 @@ namespace server.Controller
                             NetworkStream stream = source.Client.GetStream();
                             if (stream.DataAvailable)
                             {
-                                string data = Utility.ReadFromNetworkStream(stream);
+
+                                KeyValuePair<bool, string> pair = Utility.ReadFromNetworkStream(stream);
+
+                                if (pair.Key == false) { Console.WriteLine("MatchController: invalid syntax on message, discarding request."); continue; }
+
+                                string data = pair.Value;
+
+                                //string data = Utility.ReadFromNetworkStream(stream);
 
                                 if (data[0] == '!')
                                 {
@@ -426,7 +439,16 @@ namespace server.Controller
                     privatechatsThreads = AliveThreads;
                     Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
                 }
-                Thread.Sleep(10000);
+
+                if(privatechatsThreads.Count == 0)
+                {
+                    Thread.Sleep(20000);
+                }
+                else
+                {
+                    Thread.Sleep(10000);
+                }
+                
             }
         }
 

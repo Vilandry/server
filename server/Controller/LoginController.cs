@@ -46,7 +46,12 @@ namespace server.Controller
                     client = server.AcceptTcpClient();
                     NetworkStream stream = client.GetStream();
 
-                    message = Utility.ReadFromNetworkStream(stream);
+                    KeyValuePair<bool, string> pair = Utility.ReadFromNetworkStream(stream);
+
+                    if(pair.Key == false) { Console.WriteLine("LoginController: invalid syntax on message, discarding request."); continue; }
+
+                    message = pair.Value;
+
                     Console.WriteLine("LoginController:  recieved during login or register attempt: " + message);
 
 

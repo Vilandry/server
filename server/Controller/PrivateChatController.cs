@@ -90,10 +90,16 @@ namespace server.Controller
                         if (ns.DataAvailable)
                         {
 
-                            
+
                             //Console.WriteLine("TEMP: Dataavailable on portnum " + portnum);
 
-                            string message = Utility.ReadFromNetworkStream(ns);
+                            KeyValuePair<bool, string> pair = Utility.ReadFromNetworkStream(ns);
+
+                            if (pair.Key == false) { Console.WriteLine("PrivateChatController: invalid syntax on message, discarding request."); continue; }
+
+                            string message = pair.Value;
+
+                            //string message = Utility.ReadFromNetworkStream(ns);
                             //Console.WriteLine(message);
                             //conversationHistory.Add(Utility.EscapePrivateChat(message));
 

@@ -31,8 +31,35 @@ namespace server.Model
             return success;
         }
 
+        public static KeyValuePair<bool, string> Validate(string message)
+        {
+            bool success = false;
+            string text = "";
 
-        public static string ReadFromNetworkStream(NetworkStream stream)
+            string[] components = message.Split("|",2);
+            if(components.Length == 1 )
+            {
+                success = false;
+            }
+            else
+            {
+                if(components[0] != "KNOCKNOCK")
+                {
+                    success = false;
+                }
+                else
+                {
+                    success = true;
+                    text = components[1];
+                }    
+            }
+
+
+            return new KeyValuePair<bool, string>(success, text);
+        }
+
+
+        public static KeyValuePair<bool, string> ReadFromNetworkStream(NetworkStream stream)
         {
             byte[] bytes;
             string message = "";
@@ -51,7 +78,7 @@ namespace server.Model
 
 
 
-                return message;
+                return Validate(message);
         }
     }
 }

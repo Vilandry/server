@@ -44,7 +44,14 @@ namespace server.Controller
                 try
                 {
                     NetworkStream stream = client.GetStream();
-                    string command = Utility.ReadFromNetworkStream(stream);
+
+                    KeyValuePair<bool, string> pair = Utility.ReadFromNetworkStream(stream);
+
+                    if (pair.Key == false) { Console.WriteLine("MiscController: invalid syntax on message, discarding request."); continue; }
+
+                    string command = pair.Value;
+
+                    //string command = Utility.ReadFromNetworkStream(stream);
                     handleCommands(command, stream);
                 }
                 catch(Exception e)
@@ -127,7 +134,14 @@ namespace server.Controller
 
                     Thread.Sleep(100);
                     //Console.WriteLine("reading history...");
-                    string history = Utility.ReadFromNetworkStream(stream);
+                    KeyValuePair<bool, string> pair = Utility.ReadFromNetworkStream(stream);
+
+                    if (pair.Key == false) { Console.WriteLine("MiscController: invalid syntax on message, discarding request."); return; }
+
+                    string history = pair.Value;
+
+
+                    //string history = Utility.ReadFromNetworkStream(stream);
                     if (DatabaseController.instance().InsertMessageHistoryConnection(savename, inserter))
                     {
                         if (DatabaseController.instance().InsertMessageHistoryText(savename, history))
