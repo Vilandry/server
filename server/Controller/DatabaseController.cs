@@ -579,7 +579,7 @@ namespace server.Controller
         {
             lock (historyllock)
             {
-                string commandText = "SELECT chatname FROM HistoryConnector WHERE saver = @username_param";
+                string commandText = "SELECT chatname FROM HistoryConnector WHERE saver = @username_param ORDER BY chatname";
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
                 command.Parameters.AddWithValue("@username_param", username);
