@@ -437,7 +437,7 @@ namespace server.Controller
                         }
                     }
                     privatechatsThreads = AliveThreads;
-                    Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
+                    
                 }
 
                 if(privatechatsThreads.Count == 0)
@@ -446,6 +446,7 @@ namespace server.Controller
                 }
                 else
                 {
+                    Console.WriteLine("MatchController: alive chats: " + privatechatsThreads.Count);
                     Thread.Sleep(10000);
                 }
                 
