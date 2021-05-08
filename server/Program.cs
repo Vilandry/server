@@ -44,11 +44,11 @@ namespace server
             DatabaseController dc = DatabaseController.instance();
             Thread.Sleep(1000);
             LoginController lc = LoginController.instance();
-            Thread.Sleep(1000);
+            Thread.Sleep(100);
             MatchController mc = MatchController.instance();
-            Thread.Sleep(1000);
+            Thread.Sleep(100);
             MiscController miscc = MiscController.instance();
-            Thread.Sleep(1000);
+            Thread.Sleep(100);
 
             Thread login = new Thread(lc.logincontrol);
             login.Start();
