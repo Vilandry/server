@@ -429,6 +429,18 @@ namespace server.Controller
                             catch(Exception e)
                             {
                                 Console.WriteLine("MatchController: powerkill on PrivateChatThread on port " + t.Key.Portnum);
+
+                            }
+                            finally
+                            {
+                                if(t.Key.Type == CHATTPYE.PRIVATE)
+                                {
+                                    PortManager.instance().ReturnPrivateChatPort(t.Key.Portnum);
+                                }
+                                else if(t.Key.Type == CHATTPYE.GROUP)
+                                {
+                                    PortManager.instance().ReturnGroupChatPort(t.Key.Portnum);
+                                }
                             }
                         }
                         else

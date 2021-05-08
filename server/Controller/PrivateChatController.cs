@@ -27,6 +27,8 @@ namespace server.Controller
         public bool Ongoing { get { return ongoing; } }
         public int Portnum { get { return portnum; } }
 
+        public CHATTPYE Type { get { return type; } }
+
         public PrivateChatController(int port, CHATTPYE t)
         {
             count = 0;
@@ -130,15 +132,13 @@ namespace server.Controller
                                         ///send out that smbd has disconnected
                                         if (type == CHATTPYE.PRIVATE)
                                         {
-                                            PortManager.instance().ReturnPrivateChatPort(portnum);
                                             ongoing = false;
                                             return;
                                         }
                                         else if (type == CHATTPYE.GROUP)
                                         {
                                             if(count==0)
-                                            {
-                                                PortManager.instance().ReturnGroupChatPort(portnum);
+                                            {                                                
                                                 ongoing = false;
                                                 return;
                                             }
