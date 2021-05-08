@@ -72,18 +72,28 @@ namespace server.Controller
                     if (raw_text[0] == "LOGIN")
                     {
                         username = raw_text[1];
-                        string password = raw_text[2];
 
-                        success = DatabaseController.instance().successfulLogin(username, password);
+                        if (!username.All(char.IsLetterOrDigit)) { success = false; }
+                        else
+                        {
+                            string password = raw_text[2];
+
+                            success = DatabaseController.instance().successfulLogin(username, password);
+                        }                        
                     }
                     else if (raw_text[0] == "REGISTER")
                     {
                         username = raw_text[1];
-                        string password = raw_text[2];
-                        int age = Int32.Parse(raw_text[3]);
-                        int sex = Int32.Parse(raw_text[4]);
 
-                        success = DatabaseController.instance().successfulRegister(username, password, age, sex);
+                        if (!username.All(char.IsLetterOrDigit)) { success = false; }
+                        else
+                        {
+                            string password = raw_text[2];
+                            int age = Int32.Parse(raw_text[3]);
+                            int sex = Int32.Parse(raw_text[4]);
+
+                            success = DatabaseController.instance().successfulRegister(username, password, age, sex);
+                        }                       
                     }///more features to be added if needed
 
                     byte[] msg;
