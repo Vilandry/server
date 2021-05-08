@@ -205,6 +205,8 @@ namespace server.Controller
                 string answer = String.Join("!", res);
                 answer = answer + "!";*/
 
+                if (res == "") { res = "!"; }
+
                 byte[] reply = Encoding.Unicode.GetBytes(res);
 
                 stream.Write(reply);
