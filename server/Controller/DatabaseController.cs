@@ -516,7 +516,7 @@ namespace server.Controller
 
                 reader.Close();
 
-                return true;
+                return wasntAlreadyFriended;
             }
             catch (Exception ex)
             {
