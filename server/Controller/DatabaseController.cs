@@ -383,7 +383,7 @@ namespace server.Controller
                             string res = String.Format("{0}", reader[0]);
                             wasntblocked = (res == "0");
 
-                            Console.WriteLine("Blocked: " + res);
+                            //Console.WriteLine("Blocked: " + res);
                         }
                         catch (Exception f)
                         {
@@ -456,25 +456,74 @@ namespace server.Controller
                     {
                         connection.Open();
                     }
-                    string insertText = "INSERT INTO FriendList Values (@friender_name, @friended_name)";
 
-                    SqlCommand command = new SqlCommand(insertText, connection);
-                    command.Parameters.AddWithValue("@friender_name", friender);
-                    command.Parameters.AddWithValue("@friended_name", friended);
+                    if(WasntAlreadyFriended(friender,friended))
+                    {
+                        string insertText = "INSERT INTO FriendList Values (@friender_name, @friended_name)";
+
+                        SqlCommand command = new SqlCommand(insertText, connection);
+                        command.Parameters.AddWithValue("@friender_name", friender);
+                        command.Parameters.AddWithValue("@friended_name", friended);
 
 
-                    command.ExecuteNonQuery();
+                        command.ExecuteNonQuery();                        
+                    }
+
                     return true;
+
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("DatabaseController error in blocklist insertion. Error message: " + ex.Message);
+                    Console.WriteLine("DatabaseController error in friendlist insertion. Error message: " + ex.Message);
                     return false;
                 }
             }
         }
 
+        private bool WasntAlreadyFriended(string friender, string friended)
+        {
+            bool wasntAlreadyFriended = true;
 
+            try
+            {
+                if (!(connection.State == ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                string commandText = "SELECT COUNT(*) FROM friendlist where sender=@friender_name and befriended=@friended_name";
+
+                SqlCommand command = new SqlCommand(commandText, connection);
+                command.Parameters.AddWithValue("@friender_name", friender);
+                command.Parameters.AddWithValue("@friended_name", friended);
+
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                try
+                {
+                    Console.WriteLine("DatabaseController: checking if " + friended + " was friended by " + friender);
+                    reader.Read();
+                    string res = String.Format("{0}", reader[0]);
+                    wasntAlreadyFriended = (res == "0");
+
+                    Console.WriteLine("TEMP: Friended: " + res);
+                }
+                catch (Exception f)
+                {
+                    Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f);
+                }
+
+
+                reader.Close();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DatabaseController error in friendlist insertion. Error message: " + ex.Message);
+                return false;
+            }
+        }
 
 
         public bool InsertMessageHistoryConnection(string messagehistoryname, string inserter)
@@ -635,7 +684,7 @@ namespace server.Controller
 
             lock (friendllock)
             {
-                string commandText = "select befriended from friendlist  where sender = @usernameparam   intersect select sender from friendlist where befriended = @usernameparam";
+                string commandText = "select distinct befriended from friendlist  where sender = @usernameparam   intersect select sender from friendlist where befriended = @usernameparam";
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
@@ -683,6 +732,7 @@ namespace server.Controller
 
             return reslist;
         }
+        
         public List<string> GetOnlySenderLovedBy(string username)
         {
             List<string> reslist = new List<string>();
@@ -690,7 +740,7 @@ namespace server.Controller
 
             lock (friendllock)
             {
-                string commandText = "select sender from friendlist where befriended = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
+                string commandText = "select distinct sender from friendlist where befriended = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
@@ -744,7 +794,7 @@ namespace server.Controller
 
             lock (friendllock)
             {
-                string commandText = "select befriended from friendlist where sender = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
+                string commandText = "select distinct befriended from friendlist where sender = @usernameparam except ( select befriended from friendlist where sender = @usernameparam intersect select sender from friendlist where befriended = @usernameparam )";
 
                 SqlCommand command = new SqlCommand(commandText, connection); ///according to sof, its sanitized
 
@@ -844,6 +894,7 @@ namespace server.Controller
             }
         }
 
+        
     
     }
     
