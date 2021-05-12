@@ -17,7 +17,7 @@ namespace server.Controller
     {
         private static readonly object llock = new object();
         private List<MatchUser> clients;
-        private Dictionary<MatchUser, bool> cantMatch;
+        //private Dictionary<MatchUser, bool> cantMatch;
         private TcpListener server;
         private static MatchController inst;
         private ConcurrentDictionary<PrivateChatController, Thread> privatechatsThreads;

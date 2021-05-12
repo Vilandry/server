@@ -228,7 +228,7 @@ namespace server.Controller
                     }
                     catch(Exception e)
                     {
-                        Console.WriteLine("PrivateChatController notice: while shutting down the chat, we found a broken pipe.");
+                        Console.WriteLine("PrivateChatController notice: while shutting down the chat, we found a broken pipe. Error message : " + e.Message);
                     }
                     
                 }
