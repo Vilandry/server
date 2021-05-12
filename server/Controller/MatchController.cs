@@ -79,6 +79,16 @@ namespace server.Controller
                         MatchUser joineduser = RecreateUser(raw_info);
                         joineduser.Client = client;
 
+                        if(alreadyInQueue(joineduser.Username))
+                        {
+                            Console.WriteLine("MatchController: " + joineduser.Username + "is already in the matchqueue, new request is discarded!");
+
+                            byte[] erdata = Encoding.Unicode.GetBytes("ER|INQUEUE");
+
+                            ns.Write(erdata, 0, erdata.Length);
+                        }
+
+
                         Console.WriteLine("MatchController: Joined " + joineduser.ToString());
 
                         byte[] data = Encoding.Unicode.GetBytes("OK");
@@ -104,9 +114,20 @@ namespace server.Controller
         }
 
 
+        private bool alreadyInQueue(string username)
+        {
+            bool alreadyInQueue = false;
+            foreach(MatchUser user in clients)
+            {
+                alreadyInQueue = alreadyInQueue || (user.Username == username);
+            }
+
+            return alreadyInQueue;
+        }
+
         private void handleMatches()
         {
-            cantMatch = new Dictionary<MatchUser, bool>(); ///in this, we will store the known "unmatchable" users
+            //cantMatch = new Dictionary<MatchUser, bool>(); ///in this, we will store the known "unmatchable" users
 
             for (int i = 0; i < clients.Count; i++)
             {
@@ -114,6 +135,7 @@ namespace server.Controller
                 for (int j = i + 1; j < clients.Count; j++)
                 {
                     MatchUser candidate = clients[j];
+                    List<MatchUser> removeables = new List<MatchUser>();
 
 
                     bool success = lookingForThem(curUser, candidate);
@@ -149,8 +171,9 @@ namespace server.Controller
                         catch (Exception e) ///if we lost the first one, reach out the second one, and remove the first
                         {
                             Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach client, error message: " + e.Message);
-                            clients.RemoveAt(i);
-                            i--;
+                            /*clients.RemoveAt(i);
+                            i--;*/
+                            removeables.Add(clients[i]);
                             PortManager.instance().ReturnPrivateChatPort(port);
 
                             try
@@ -161,7 +184,13 @@ namespace server.Controller
                             catch (Exception f) ///if we lost that one too, remove it too
                             {
                                 Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach candidate, error message: " + f.Message);
-                                clients.RemoveAt(j - 1);
+                                //clients.RemoveAt(j - 1);
+                                removeables.Add(clients[j]);
+                            }
+
+                            foreach(MatchUser removeable in removeables)
+                            {
+                                removeFromClientList(removeable.Username);
                             }
                             break;
                         }
@@ -176,7 +205,8 @@ namespace server.Controller
                         catch (Exception e) ///if we lost the candidate
                         {
                             Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach candidate, error message: " + e.Message);
-                            clients.RemoveAt(j);
+                            //clients.RemoveAt(j);
+                            removeables.Add(clients[j]);
                             PortManager.instance().ReturnPrivateChatPort(port);
 
                             try
@@ -187,12 +217,18 @@ namespace server.Controller
                             catch (Exception f) ///if we lost the original meanwhile
                             {
                                 Console.WriteLine("MatchController error: Error during matchmaking: couldnt reach client, error message: " + f.Message);
-                                clients.RemoveAt(i);
+                                /*clients.RemoveAt(i);
                                 i--;
-                                break;
+                                break;*/
+
+                                removeables.Add(clients[i]);
                             }
 
-                            continue;
+                            foreach (MatchUser removeable in removeables)
+                            {
+                                removeFromClientList(removeable.Username);
+                            }
+                            break;
                         }
 
 
@@ -215,7 +251,7 @@ namespace server.Controller
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("MatchController error: Error during matchmaking: the client left during that little timestamp " + e.Message);
+                            Console.WriteLine("MatchController error: Error during matchmaking: the client left during that little timestamp, error message: " + e.Message);
                         }
 
                         Thread.Sleep(200); ///wait a bit to make sure, every package has arrived
@@ -230,7 +266,7 @@ namespace server.Controller
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("MatchController: Error during matchmaking: the candidate left during that little timestamp " + e.Message);
+                            Console.WriteLine("MatchController: Error during matchmaking: the candidate left during that little timestamp, error message " + e.Message);
                         }
 
                         PrivateChatController pcc = new PrivateChatController(port, CHATTPYE.PRIVATE);
@@ -301,12 +337,16 @@ namespace server.Controller
                 return false;
             }
 
+
+            /*MatchUser candidateArch = new MatchUser();
+            candidateArch.setArch(candidate);*/
+
             bool success = (candidate.Age == curUser.Age); ///first step
 
             success = success && (candidate.Sex == curUser.LookingForSex || curUser.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(curUser.Username, candidate.Username); ///we are cool if the candidate is in the gender we are looking for OR if we dont care about it at all
             success = success && (curUser.Sex == candidate.LookingForSex || candidate.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(candidate.Username, curUser.Username); ///and vice versa
 
-            if (success == false) ///then add it to the "unmatchable" group.
+            /*if (success == false) ///then add it to the "unmatchable" group.
             {
                 cantMatch.Add(new MatchUser(curUser), false);
 
@@ -319,7 +359,7 @@ namespace server.Controller
                         cantMatch.Add(archuser, false);
                     }
                 }
-            }
+            }*/
             return success;
         }
 
@@ -393,7 +433,7 @@ namespace server.Controller
         private void handleCommands(string command)
         {
             string[] commandargs = command.Split("|");
-            if (commandargs[0] == "!LEAVE")
+            if (commandargs[0] == "!LEAVE" && commandargs.Length == 2)
             {
                 if (removeFromClientList(commandargs[1]))
                 {
@@ -433,6 +473,7 @@ namespace server.Controller
                             }
                             finally
                             {
+                                Thread.Sleep(10);
                                 if(t.Key.Type == CHATTPYE.PRIVATE)
                                 {
                                     PortManager.instance().ReturnPrivateChatPort(t.Key.Portnum);

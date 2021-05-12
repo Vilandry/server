@@ -23,7 +23,8 @@ namespace server.Model
 
     public enum CHATTPYE
     {
-        GROUP,
-        PRIVATE
+        PRIVATE = 0,
+        GROUP = 1,       
+        FRIENDLY = 2
     }
 }

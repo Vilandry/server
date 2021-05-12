@@ -26,7 +26,7 @@ namespace server.Controller
         private string initialCatalog;
 
 
-        private static readonly object userllock = new object();
+        private static readonly object registerllock = new object();
         private static readonly object historyllock = new object();
         private static readonly object blockllock = new object();
         private static readonly object friendllock = new object();
@@ -186,7 +186,7 @@ namespace server.Controller
 
         public string GetAgeAndGender(string username)
         {
-            lock (userllock)
+            lock (registerllock)
             {
                 string commandText = "SELECT AGE, GENDER FROM Users WHERE username = @username_param";
 
@@ -233,7 +233,7 @@ namespace server.Controller
 
         public bool successfulRegister(string username, string password, int age, int sex)
         {
-            lock (userllock)
+            lock (registerllock)
             {
                 username = username.Replace("'", "\""); ///we wont let them use ' in registration, but better to be safe than sorry
                 string commandText = "SELECT COUNT (*) FROM Users WHERE username = @username_param";
@@ -285,7 +285,7 @@ namespace server.Controller
 
         public bool successfulLogin(string username, string password)
         {
-            lock (userllock)
+            lock (registerllock)
             {
                 string commandText = "SELECT password FROM Users WHERE username = @username_param";
 
@@ -482,47 +482,50 @@ namespace server.Controller
 
         private bool WasntAlreadyFriended(string friender, string friended)
         {
-            bool wasntAlreadyFriended = true;
-
-            try
+            lock(friendllock)
             {
-                if (!(connection.State == ConnectionState.Open))
-                {
-                    connection.Open();
-                }
-                string commandText = "SELECT COUNT(*) FROM friendlist where sender=@friender_name and befriended=@friended_name";
-
-                SqlCommand command = new SqlCommand(commandText, connection);
-                command.Parameters.AddWithValue("@friender_name", friender);
-                command.Parameters.AddWithValue("@friended_name", friended);
-
-
-                SqlDataReader reader = command.ExecuteReader();
+                bool wasntAlreadyFriended = true;
 
                 try
                 {
-                    Console.WriteLine("DatabaseController: checking if " + friended + " was friended by " + friender);
-                    reader.Read();
-                    string res = String.Format("{0}", reader[0]);
-                    wasntAlreadyFriended = (res == "0");
+                    if (!(connection.State == ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    string commandText = "SELECT COUNT(*) FROM friendlist where sender=@friender_name and befriended=@friended_name";
 
-                    Console.WriteLine("TEMP: Friended: " + res);
+                    SqlCommand command = new SqlCommand(commandText, connection);
+                    command.Parameters.AddWithValue("@friender_name", friender);
+                    command.Parameters.AddWithValue("@friended_name", friended);
+
+
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    try
+                    {
+                        Console.WriteLine("DatabaseController: checking if " + friended + " was friended by " + friender);
+                        reader.Read();
+                        string res = String.Format("{0}", reader[0]);
+                        wasntAlreadyFriended = (res == "0");
+
+                        Console.WriteLine("TEMP: Friended: " + res);
+                    }
+                    catch (Exception f)
+                    {
+                        Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f);
+                    }
+
+
+                    reader.Close();
+
+                    return wasntAlreadyFriended;
                 }
-                catch (Exception f)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("DatabaseController notice: error during reading, probably reading is not finished. Closing reader and returning result... Error message: " + f);
+                    Console.WriteLine("DatabaseController error in friendlist insertion. Error message: " + ex.Message);
+                    return false;
                 }
-
-
-                reader.Close();
-
-                return wasntAlreadyFriended;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("DatabaseController error in friendlist insertion. Error message: " + ex.Message);
-                return false;
-            }
+            }           
         }
 
 
