@@ -88,6 +88,7 @@ namespace server.Controller
                             byte[] erdata = Encoding.Unicode.GetBytes("ER|INQUEUE");
 
                             ns.Write(erdata, 0, erdata.Length);
+                            continue;
                         }
 
 
