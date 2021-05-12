@@ -79,6 +79,8 @@ namespace server.Controller
                         MatchUser joineduser = RecreateUser(raw_info);
                         joineduser.Client = client;
 
+                        if(joineduser.Username == "") { continue; }
+
                         if(alreadyInQueue(joineduser.Username))
                         {
                             Console.WriteLine("MatchController: " + joineduser.Username + "is already in the matchqueue, new request is discarded!");
@@ -316,6 +318,7 @@ namespace server.Controller
             catch (Exception e)
             {
                 Console.WriteLine("MatchController error: RecreateUser error, error message: " + e.Message);
+                queued.Username = "";
             }
 
 
