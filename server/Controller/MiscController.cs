@@ -53,6 +53,7 @@ namespace server.Controller
 
                     //string command = Utility.ReadFromNetworkStream(stream);
                     handleCommands(command, stream);
+                    client.Close();
                 }
                 catch(Exception e)
                 {
@@ -177,6 +178,8 @@ namespace server.Controller
             {
                 string convid = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3];
                 string res = DatabaseController.instance().GetChatHistoryText(convid);
+
+                //if(res == "") { res = "!"; }
 
                 byte[] reply = Encoding.Unicode.GetBytes(res);
 
