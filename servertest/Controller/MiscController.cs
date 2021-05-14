@@ -9,10 +9,10 @@ using System.Data;
 using System.Text;
 using System.Collections.Concurrent;
 
-using server.Model;
-using server.Controller;
+using servertest.Model;
+using servertest.Controller;
 
-namespace server.Controller
+namespace servertest.Controller
 {
     class MiscController
     {

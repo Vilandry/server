@@ -14,7 +14,7 @@ using server.Model;
 
 namespace server.Controller
 {
-    class DatabaseController
+    class DatabaseController : IDatabaseController
     {
         private SqlConnection connection;
 
