@@ -25,7 +25,7 @@ namespace servertest.Controller
 
         public static MiscController instance()
         {
-            if(inst == null)
+            if (inst == null)
             {
                 inst = new MiscController();
             }
@@ -37,7 +37,7 @@ namespace servertest.Controller
             server = new TcpListener(IPAddress.Any, PortManager.instance().Miscport);
             server.Start();
 
-            while(true)
+            while (true)
             {
                 TcpClient client = server.AcceptTcpClient();
 
@@ -55,7 +55,7 @@ namespace servertest.Controller
                     handleCommands(command, stream);
                     client.Close();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Error in MiscManager, error message: " + e.Message);
                 }
@@ -66,23 +66,23 @@ namespace servertest.Controller
         {
             string[] commandargs = command.Split("|");
 
-            if(commandargs[0] == "CONVSAVE")
+            if (commandargs[0] == "CONVSAVE")
             {
                 ConvSave(commandargs, stream);
             }
-            else if(commandargs[0] == "CONVLOAD")
+            else if (commandargs[0] == "CONVLOAD")
             {
                 ConvLoad(commandargs, stream);
             }
             else if (commandargs[0] == "LISTLOAD")
             {
-                ListLoad(commandargs, stream);                
+                ListLoad(commandargs, stream);
             }
-            else if(commandargs[0] == "BLOCK")
+            else if (commandargs[0] == "BLOCK")
             {
                 Block(commandargs, stream);
             }
-            else if(commandargs[0] == "FRIEND")
+            else if (commandargs[0] == "FRIEND")
             {
                 Friend(commandargs, stream);
             }
@@ -95,6 +95,7 @@ namespace servertest.Controller
 
         private void ConvSave(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 5) { return; }
             string savename = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3]; ;
             string inserter = commandargs[4];
             bool wasSaved = DatabaseController.instance().AlreadySavedChatHistory(savename);
@@ -172,11 +173,12 @@ namespace servertest.Controller
                 }
             }
         }
-        
+
         private void ConvLoad(string[] commandargs, NetworkStream stream)
         {
             try
             {
+                if (commandargs.Length != 4) { return; }
                 string convid = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3];
                 string res = DatabaseController.instance().GetChatHistoryText(convid);
 
@@ -191,11 +193,12 @@ namespace servertest.Controller
                 Console.WriteLine("MiscController error: could not send convtext message to client! Error message: " + e.Message);
             }
         }
-        
+
         private void ListLoad(string[] commandargs, NetworkStream stream)
         {
             try
             {
+                if (commandargs.Length != 2) { return; }
                 string username = commandargs[1];
                 Console.WriteLine("MiscController: trying to get the list of " + username);
 
@@ -221,9 +224,10 @@ namespace servertest.Controller
                 Console.WriteLine("MiscController error: could not send back convlist message to client! Error message: " + e.Message);
             }
         }
-        
+
         private void Block(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 3) { return; }
             string blocker = commandargs[1];
             string blocked = commandargs[2];
             try
@@ -249,9 +253,10 @@ namespace servertest.Controller
                 return;
             }
         }
-        
+
         private void Friend(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 3) { return; }
             string friender = commandargs[1];
             string friended = commandargs[2];
             try
@@ -280,6 +285,7 @@ namespace servertest.Controller
 
         private void FriendLoad(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 2) { return; }
             string username = commandargs[1];
 
             try
@@ -299,7 +305,7 @@ namespace servertest.Controller
                 //Console.WriteLine("MiscController TEMP: " + reply);
 
                 try
-                {                    
+                {
 
                     byte[] msg = Encoding.Unicode.GetBytes(reply);
                     stream.Write(msg);

@@ -37,7 +37,8 @@ namespace servertest.Model
             privateChatPorts = new ConcurrentQueue<int>();
             groupChatPorts = new ConcurrentQueue<int>();
 
-            
+            privateChatPorts.Enqueue(11001);
+            privateChatPorts.Enqueue(11002);
         }
 
         public int GetPrivateChatPort()

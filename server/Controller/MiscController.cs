@@ -95,6 +95,7 @@ namespace server.Controller
 
         private void ConvSave(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 5) { return; }
             string savename = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3]; ;
             string inserter = commandargs[4];
             bool wasSaved = DatabaseController.instance().AlreadySavedChatHistory(savename);
@@ -177,6 +178,7 @@ namespace server.Controller
         {
             try
             {
+                if(commandargs.Length != 4) { return; }
                 string convid = commandargs[1] + "|" + commandargs[2] + "|" + commandargs[3];
                 string res = DatabaseController.instance().GetChatHistoryText(convid);
 
@@ -196,6 +198,7 @@ namespace server.Controller
         {
             try
             {
+                if (commandargs.Length != 2) { return; }
                 string username = commandargs[1];
                 Console.WriteLine("MiscController: trying to get the list of " + username);
 
@@ -224,6 +227,7 @@ namespace server.Controller
         
         private void Block(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 3) { return; }
             string blocker = commandargs[1];
             string blocked = commandargs[2];
             try
@@ -252,6 +256,7 @@ namespace server.Controller
         
         private void Friend(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 3) { return; }
             string friender = commandargs[1];
             string friended = commandargs[2];
             try
@@ -280,6 +285,7 @@ namespace server.Controller
 
         private void FriendLoad(string[] commandargs, NetworkStream stream)
         {
+            if (commandargs.Length != 2) { return; }
             string username = commandargs[1];
 
             try

@@ -61,16 +61,19 @@ namespace servertest
 
         public bool WasntBlockedBy(string blockedby, string blockedCandidate)
         {
-            return false;
+            if (blockedby == "friend" && blockedCandidate == "candidate") { return false; }
+            return true;
         }
 
         public bool BlockUser(string blocker, string blocked)
         {
+            if(blocker == "friend" && blocked == "candidate") { return true; }
             return false;
         }
 
         public bool FriendUser(string friender, string friended)
         {
+            if(friender == "friend" && friended == "candidate") { return true; }
             return false;
         }
 

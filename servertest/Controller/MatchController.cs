@@ -8,6 +8,7 @@ using System.Net;
 using System.Data;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 using servertest.Model;
 
@@ -91,6 +92,8 @@ namespace servertest.Controller
                             continue;
                         }
 
+                        Trace.WriteLine("here");
+
 
                         Console.WriteLine("MatchController: Joined " + joineduser.ToString());
 
@@ -140,19 +143,20 @@ namespace servertest.Controller
                     MatchUser candidate = clients[j];
                     List<MatchUser> removeables = new List<MatchUser>();
 
-
+                    Trace.WriteLine(curUser.Username + "    " + candidate.Username);
                     bool success = lookingForThem(curUser, candidate);
+                    Trace.WriteLine(success);
                     if (success)
                     {
                         ///create a new instance of privatechat-controller, and match them
                         Console.WriteLine("MatchController: ITS A MATCH! Matched " + curUser.Username + " WITH " + candidate.Username + "!");
-
+                        Trace.WriteLine("MatchController: ITS A MATCH! Matched " + curUser.Username + " WITH " + candidate.Username + "!");
 
 
                         int port = PortManager.instance().GetPrivateChatPort();
                         if (port == -1)
                         {
-                            Console.WriteLine("MatchController: No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
+                            Console.WriteLine("MatchController: No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue"); Trace.WriteLine("MatchController: No available port, no match will happen! Consider restarting the server with a wilder area of ports. Waiting for 1 second then continue");
                             Thread.Sleep(10000);
                             handleMatches();
                             return;
@@ -346,8 +350,7 @@ namespace servertest.Controller
             candidateArch.setArch(candidate);*/
 
             bool success = (candidate.Age == curUser.Age); ///first step
-
-            success = success && (candidate.Sex == curUser.LookingForSex || curUser.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(curUser.Username, candidate.Username); ///we are cool if the candidate is in the gender we are looking for OR if we dont care about it at all
+            success = success && (candidate.Sex == curUser.LookingForSex || curUser.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(curUser.Username, candidate.Username);  ///we are cool if the candidate is in the gender we are looking for OR if we dont care about it at all
             success = success && (curUser.Sex == candidate.LookingForSex || candidate.LookingForSex == GENDER.ANY) && DatabaseController.instance().WasntBlockedBy(candidate.Username, curUser.Username); ///and vice versa
 
             /*if (success == false) ///then add it to the "unmatchable" group.
