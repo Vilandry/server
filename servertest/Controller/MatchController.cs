@@ -513,5 +513,6 @@ namespace servertest.Controller
             }
         }
 
+        public TcpListener Server { get { return server; } }
     }
 }

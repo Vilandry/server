@@ -1,9 +1,11 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Net.Sockets;
 using System.Text;
 using System.Collections.Generic;
 using System;
+using System.Diagnostics;
+
 using servertest.Controller;
 using servertest.Model;
 
@@ -305,7 +307,7 @@ namespace servertest
         #region MatchController
 
         [TestMethod]
-        public void MatchControllerTest1()
+        public void MatchControllerTest1_CONNECT()
         {
             MatchController mc = MatchController.instance();
             Thread thread = new Thread(mc.handleRequests);
@@ -343,11 +345,13 @@ namespace servertest
 
             string rightres = Utility.ClientReadFromNetworkStream(rightstream);
             Assert.AreEqual(rightres, "OK");
+
+            try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }
         }
 
 
         [TestMethod]
-        public void MatchControllerTest2()
+        public void MatchControllerTest2_MATCH()
         {
             MatchController mc = MatchController.instance();
             Thread thread = new Thread(mc.handleRequests);
@@ -389,10 +393,11 @@ namespace servertest
 
             Assert.AreEqual("11001", leftres);
             Assert.AreEqual("11001", rightres);
+            try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }
         }
 
         [TestMethod]
-        public void MatchControllerTest3()
+        public void MatchControllerTest3_MULTIPLE()
         {
             MatchController mc = MatchController.instance();
             Thread thread = new Thread(mc.handleRequests);
@@ -471,10 +476,11 @@ namespace servertest
 
             Assert.AreEqual("11002", leftres2);
             Assert.AreEqual("11002", rightres2);
+            try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }
         }
 
         [TestMethod]
-        public void MatchControllerTest4()
+        public void MatchControllerTest4_BLOCK()
         {
             MatchController mc = MatchController.instance();
             Thread thread = new Thread(mc.handleRequests);
@@ -526,13 +532,167 @@ namespace servertest
             NetworkStream leftstream2 = Leftclient2.GetStream();
             byte[] leftattempt2 = Encoding.Unicode.GetBytes(Leftmsg2);
 
+            
             leftstream2.Write(leftattempt2);
             Thread.Sleep(10);
+
+            ///PORT
             leftres = Utility.ClientReadFromNetworkStream(leftstream);
             string leftres2 = Utility.ClientReadFromNetworkStream(leftstream2);
 
+            ///ID
             Thread.Sleep(100);
+            Trace.WriteLine(leftres);
+            leftres = Utility.ClientReadFromNetworkStream(leftstream);
+            Trace.WriteLine(leftres);
+
+
+            string[] idArgs = leftres.Split("|");
+
+            Assert.AreEqual("candidate", Array.Find(idArgs, candidate => (candidate == "candidate")) );
+            Assert.AreEqual("candidate2", Array.Find(idArgs, candidate => (candidate == "candidate2")));
+
+            try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }
         }
+
+
+        [TestMethod]
+        public void MatchControllerTest5_LEAVE()
+        {
+            MatchController mc = MatchController.instance();
+            Thread thread = new Thread(mc.handleRequests);
+            thread.Start();
+
+            ///A|S|LS
+            string Leftmsg = "KNOCKNOCK|candidate1|1|1|1";
+
+
+            TcpClient Leftclient = new TcpClient("localhost", PortManager.instance().Matchport);
+
+
+
+
+            NetworkStream leftstream = Leftclient.GetStream();
+            byte[] leftattempt = Encoding.Unicode.GetBytes(Leftmsg);
+
+            leftstream.Write(leftattempt);
+            Thread.Sleep(10);
+
+            string leftres = Utility.ClientReadFromNetworkStream(leftstream); ///note that its the server's read function, which is different and requires the KNOCKNOCK| trailer.
+
+
+            Console.WriteLine(leftres + "|");
+
+            Leftmsg = "KNOCKNOCK|!LEAVE|candidate1";
+            leftattempt = Encoding.Unicode.GetBytes(Leftmsg);
+
+            leftstream.Write(leftattempt);
+
+
+            string rightmsg = "KNOCKNOCK|friend1|1|1|1";
+            TcpClient Righttclient = new TcpClient("localhost", PortManager.instance().Matchport);
+            NetworkStream rightstream = Righttclient.GetStream();
+
+            byte[] rightattempt = Encoding.Unicode.GetBytes(rightmsg);
+
+            rightstream.Write(rightattempt);
+
+            string rightres = Utility.ClientReadFromNetworkStream(rightstream);
+            Trace.WriteLine("righres: " + rightres);
+
+
+
+            ///A|S|LS
+            string Leftmsg2 = "KNOCKNOCK|candidate2|1|1|1";
+
+
+            TcpClient Leftclient2 = new TcpClient("localhost", PortManager.instance().Matchport);
+
+
+
+
+            NetworkStream leftstream2 = Leftclient2.GetStream();
+            byte[] leftattempt2 = Encoding.Unicode.GetBytes(Leftmsg2);
+
+            
+            leftstream2.Write(leftattempt2);
+
+            ///PORT
+            rightres = Utility.ClientReadFromNetworkStream(rightstream);
+            Thread.Sleep(10);
+
+            ///ID
+            rightres = Utility.ClientReadFromNetworkStream(rightstream);
+
+
+            string[] idArgs = rightres.Split("|");
+
+            Assert.AreEqual("friend1", Array.Find(idArgs, candidate => (candidate == "friend1")));
+            Assert.AreEqual("candidate2", Array.Find(idArgs, candidate => (candidate == "candidate2")));
+
+
+            try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }
+        }
+        #endregion
+
+
+        #region PrivateChatController
+
+        [TestMethod]
+        public void PrivateChattingTest()
+        {
+            PrivateChatController pc = new PrivateChatController(11111, CHATTPYE.PRIVATE);
+
+
+            Thread thread = new Thread(pc.handleConnecting);
+            thread.Start();
+
+
+            TcpClient leftClient = new TcpClient("localhost", 11111);
+            NetworkStream leftstream = leftClient.GetStream();
+
+            TcpClient rightClient = new TcpClient("localhost", 11111);
+            NetworkStream rightstream = rightClient.GetStream();
+
+            string validate = "KNOCKNOCK|";
+
+            string msg = validate + "leftUser|Hi rightuser!";
+
+            byte[] attempt = Encoding.Unicode.GetBytes(msg);
+
+            leftstream.Write(attempt);
+
+            string leftRecieved = Utility.ClientReadFromNetworkStream(leftstream);
+            string rightRecieved = Utility.ClientReadFromNetworkStream(rightstream);
+
+            Assert.AreEqual("leftUser|Hi rightuser!", leftRecieved);
+            Assert.AreEqual("leftUser|Hi rightuser!", rightRecieved);
+
+            msg = validate + "leftUser|Are You here?";
+            attempt = Encoding.Unicode.GetBytes(msg);
+
+            leftstream.Write(attempt);
+
+            leftRecieved = Utility.ClientReadFromNetworkStream(leftstream);
+            rightRecieved = Utility.ClientReadFromNetworkStream(rightstream);
+
+            Assert.AreEqual("leftUser|Are You here?", leftRecieved);
+            Assert.AreEqual("leftUser|Are You here?", rightRecieved);
+
+
+            msg = validate + "rightUser|Sorry :( Yeah, I'm here :) 😊";
+            attempt = Encoding.Unicode.GetBytes(msg);
+
+            rightstream.Write(attempt);
+
+            leftRecieved = Utility.ClientReadFromNetworkStream(leftstream);
+            rightRecieved = Utility.ClientReadFromNetworkStream(rightstream);
+
+            Assert.AreEqual("rightUser|Sorry :( Yeah, I'm here :) 😊", leftRecieved);
+            Assert.AreEqual("rightUser|Sorry :( Yeah, I'm here :) 😊", rightRecieved);
+        }
+
+
         #endregion
     }
 }
