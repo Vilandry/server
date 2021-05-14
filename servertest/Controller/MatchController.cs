@@ -94,13 +94,14 @@ namespace servertest.Controller
 
                         Trace.WriteLine("here");
 
-
+                        Trace.WriteLine("MatchController: Joined " + joineduser.ToString());
                         Console.WriteLine("MatchController: Joined " + joineduser.ToString());
 
                         byte[] data = Encoding.Unicode.GetBytes("OK");
 
                         ns.Write(data, 0, data.Length);
                         Console.WriteLine("MatchController: Replied with " + Encoding.Unicode.GetString(data));
+                        Trace.WriteLine("MatchController: Replied with " + Encoding.Unicode.GetString(data));
 
                         lock (llock)
                         {

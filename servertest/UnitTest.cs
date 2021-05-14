@@ -42,7 +42,7 @@ namespace servertest
 
             Console.WriteLine(res + "|");
 
-            Assert.AreEqual(res, "OK|");
+            Assert.AreEqual("OK|", res);
         }
 
         [TestMethod]
@@ -71,7 +71,7 @@ namespace servertest
 
             Console.WriteLine(res + "|");
 
-            Assert.AreEqual(res, "ER|-1|-1");
+            Assert.AreEqual("ER|-1|-1", res);
         }
 
 
@@ -99,7 +99,7 @@ namespace servertest
 
             Console.WriteLine(res + "|");
 
-            Assert.AreEqual(res, "OK|0|1");
+            Assert.AreEqual("OK|0|1", res);
         }
 
         [TestMethod]
@@ -126,7 +126,7 @@ namespace servertest
 
             Console.WriteLine(res + "|");
 
-            Assert.AreEqual(res, "ER|-1|-1");
+            Assert.AreEqual("ER|-1|-1", res);
         }
         #endregion
 
@@ -629,6 +629,55 @@ namespace servertest
 
             Assert.AreEqual("friend1", Array.Find(idArgs, candidate => (candidate == "friend1")));
             Assert.AreEqual("candidate2", Array.Find(idArgs, candidate => (candidate == "candidate2")));
+
+
+            try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }
+        }
+
+        [TestMethod]
+        public void MatchControllerTest6_INQUEUE()
+        {
+            MatchController mc = MatchController.instance();
+            Thread thread = new Thread(mc.handleRequests);
+            thread.Start();
+
+            ///A|S|LS
+            string Leftmsg = "KNOCKNOCK|candidate1|1|1|3";
+
+
+            TcpClient Leftclient = new TcpClient("localhost", PortManager.instance().Matchport);
+
+
+
+
+            NetworkStream leftstream = Leftclient.GetStream();
+            byte[] leftattempt = Encoding.Unicode.GetBytes(Leftmsg);
+
+            leftstream.Write(leftattempt);
+            Thread.Sleep(10);
+
+            string leftres = Utility.ClientReadFromNetworkStream(leftstream); ///note that its the server's read function, which is different and requires the KNOCKNOCK| trailer.
+
+
+            Console.WriteLine(leftres + "|");
+
+            Assert.AreEqual(leftres, "OK");
+
+            string rightmsg = "KNOCKNOCK|candidate1|1|1|2";
+            TcpClient Righttclient = new TcpClient("localhost", PortManager.instance().Matchport);
+            NetworkStream rightstream = Righttclient.GetStream();
+
+            byte[] rightattempt = Encoding.Unicode.GetBytes(rightmsg);
+
+            rightstream.Write(rightattempt);
+
+            string rightres = Utility.ClientReadFromNetworkStream(rightstream);
+
+            Thread.Sleep(10);
+
+            //Assert.AreEqual(rightres, "OK");
+
+            Assert.AreEqual("ER|INQUEUE", rightres);
 
 
             try { mc.Server.Stop(); thread.Abort(); } catch (Exception e) { }

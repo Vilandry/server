@@ -16,7 +16,7 @@ using servertest.Controller;
 
 namespace servertest
 {
-    public class DatabaseController : server.Controller.IDatabaseController
+    public class DatabaseController
     {
         static DatabaseController inst;
 

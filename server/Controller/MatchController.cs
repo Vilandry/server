@@ -8,6 +8,7 @@ using System.Net;
 using System.Data;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 using server.Model;
 
@@ -66,7 +67,6 @@ namespace server.Controller
                     if (pair.Key == false) { Console.WriteLine("MatchController: invalid syntax on message, discarding request."); continue; }
 
                     string raw_info = pair.Value;
-
                     //string raw_info = Utility.ReadFromNetworkStream(ns);
                     //Console.WriteLine("MatchController: Raw info: " + raw_info);
 
