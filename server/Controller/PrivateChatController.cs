@@ -70,7 +70,7 @@ namespace server.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine("PrivateChatController: Error on port " + portnum + ", error message: " + e.Message);
+                Console.WriteLine("PrivateChatController error: Error on port " + portnum + ", error message: " + e.Message);
             }
 
         }

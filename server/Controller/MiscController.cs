@@ -150,7 +150,7 @@ namespace server.Controller
                         {
                             okmsg = Encoding.Unicode.GetBytes("OK");
                             stream.Write(okmsg);
-                            Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text\n" + history);
+                            Console.WriteLine("MiscController: inserted message history for " + inserter + " as " + savename + " with text!");
                         }
                         else
                         {
