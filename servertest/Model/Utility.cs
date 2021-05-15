@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Diagnostics;
+using System.Threading;
 
 namespace servertest.Model
 {
@@ -90,6 +91,7 @@ namespace servertest.Model
             int i = 0, byteCount = 0;
             do
             {
+                Thread.Sleep(100);
                 bytes = new Byte[1024];
                 i = stream.Read(bytes, 0, bytes.Length);
                 // Translate data bytes to a ASCII string.
